@@ -1,9 +1,14 @@
 package entity
 
+/**
+ * The covered card on top has the greatest index.
+ * @param cards - contains all the cards.
+ */
 class Deck constructor(val cards: MutableList<SchwimmenCard>) {
     /**
-     * Assumption is that last covered card has highest index
-     * @return MutableList<SchwimmenCard>, or null if size < 3
+     * Removes the three covered cards on top of the deck and returns them as a mutable list.
+     * If the deck contains less than 3 cards, null will be returned.
+     * @return MutableList<SchwimmenCard>?
      */
     fun drawThreeCards(): MutableList<SchwimmenCard>? {
         require(cards.size > 2) { return null }
@@ -12,10 +17,5 @@ class Deck constructor(val cards: MutableList<SchwimmenCard>) {
             result.add(cards.removeAt(cards.lastIndex))
         }
         return result
-    }
-
-    fun drawOneCard(): SchwimmenCard? {
-        require(cards.size > 0) { return null }
-        return cards.removeAt(cards.lastIndex)
     }
 }

@@ -1,39 +1,45 @@
 package entity
 
-class SchwimmenGame {
-    private var passCounter: Int = 0
-    private var gameLoop: Boolean = false
-    private val tableCards: MutableList<SchwimmenCard> = mutableListOf()
-    private val players: List<SchwimmenPlayer> = listOf()
-    var currentPlayer: SchwimmenPlayer = players.get(0)
+/**
+ * This class is the basis of our data storage, it helps manage and keep track of the game state at any given point.
+ * @param passCounter - is used to track the number of players who have passed in a row.
+ * @param gameLoop - is the lever to end game.
+ * @param tableCards - is a mutable list of 3 uncovered cards on the table.
+ * @param players - is a list of participating players.
+ * @param currentPlayer - to know whose turn it is.
+ * @param deck - is a [Deck] object that is initialized with 32 cards.
+ */
+class SchwimmenGame constructor(
+    private var passCounter: Int,
+    private var gameLoop: Boolean,
+    private val tableCards: MutableList<SchwimmenCard>,
+    private val players: List<SchwimmenPlayer>,
+    var currentPlayer: SchwimmenPlayer,
+    private val deck: Deck) {
 
-    // To initialize deck with an empty list of cards
-    val startingCards: MutableList<SchwimmenCard> = mutableListOf()
-    private val deck: Deck = Deck(startingCards)
-
-    // Build the cross product in init block
-    val suits: List<CardSuit> = listOf(
-        CardSuit.CLUBS,
-        CardSuit.SPADES,
-        CardSuit.HEARTS,
-        CardSuit.DIAMONDS
-    )
-    val values: List<CardValue> = listOf(
-        CardValue.SEVEN,
-        CardValue.EIGHT,
-        CardValue.NINE,
-        CardValue.TEN,
-        CardValue.JACK,
-        CardValue.QUEEN,
-        CardValue.KING,
-        CardValue.ACE
-    )
-
+    /**
+     * Initialize players, create 32 cards using cross product, then shuffle and distribute cards
+     */
     init {
-        // Initialize players
+        // Initialize players..
         // ...
 
-        // Initialize deck with 32 cards of all possible combinations then shuffle
+        val suits: List<CardSuit> = listOf(
+            CardSuit.CLUBS,
+            CardSuit.SPADES,
+            CardSuit.HEARTS,
+            CardSuit.DIAMONDS
+        )
+        val values: List<CardValue> = listOf(
+            CardValue.SEVEN,
+            CardValue.EIGHT,
+            CardValue.NINE,
+            CardValue.TEN,
+            CardValue.JACK,
+            CardValue.QUEEN,
+            CardValue.KING,
+            CardValue.ACE
+        )
         for (suit in suits) {
             for (value in values) {
                 deck.cards.add(SchwimmenCard(suit, value))
@@ -42,16 +48,18 @@ class SchwimmenGame {
         deck.cards.shuffle()
 
         deck.drawThreeCards()?.forEach{
-            tableCards.add(deck.cards.last())
+            tableCards.add(it)
         }
-
         for (player in players) {
             deck.drawThreeCards()?.forEach{
-                player.dealtHandCards.add(deck.cards.last())
+                player.dealtHandCards.add(it)
             }
         }
     }
 
+    /**
+     * This is used to model the game scenario where all players have passed
+     */
     fun incrementPassCounter(): Unit {
         passCounter += 1
     }
