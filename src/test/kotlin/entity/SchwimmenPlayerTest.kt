@@ -16,7 +16,7 @@ class SchwimmenPlayerTest {
     fun checkHandScoreTestCaseOne() {
         // Test: similar cards -> handscore = 30.5
         player.dealtHandCards.addAll(mutableListOf(card1, card2, card3))
-        print(player.dealtHandCards.toString())
+        println("${player.dealtHandCards} make ${player.checkHandScore()} combined.")
         assertEquals(30.5, player.checkHandScore())
         player.dealtHandCards.clear()
     }
@@ -24,8 +24,24 @@ class SchwimmenPlayerTest {
     @Test
     fun checkHandScoreTestCaseTwo() {
         player.dealtHandCards.addAll(mutableListOf(card2, card3, card4))
-        print(player.dealtHandCards.toString())
+        println("${player.dealtHandCards} make ${player.checkHandScore()} combined.")
         assertEquals(26.0, player.checkHandScore())
+        player.dealtHandCards.clear()
+    }
+
+    @Test
+    fun checkHandScoreTestCaseThree() {
+        player.dealtHandCards.addAll(mutableListOf(card1, card3, card4))
+        println("${player.dealtHandCards} make ${player.checkHandScore()} combined.")
+        assertEquals(28.0, player.checkHandScore())
+        player.dealtHandCards.clear()
+    }
+
+    @Test
+    fun checkHandScoreTestCaseFour() {
+        player.dealtHandCards.addAll(mutableListOf(card1, card2, card4))
+        println("${player.dealtHandCards} make ${player.checkHandScore()} combined.")
+        assertEquals(27.0, player.checkHandScore())
         player.dealtHandCards.clear()
     }
 }

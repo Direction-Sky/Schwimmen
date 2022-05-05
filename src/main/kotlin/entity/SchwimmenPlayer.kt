@@ -14,22 +14,9 @@ class SchwimmenPlayer constructor(val name: String, val pos: Int) {
     fun checkHandScore(): Double {
         var result: Double = 0.0
 
-        // It's easier to prove that at least one card is different than to prove that all cards are similar
-        val differentSuit: Boolean
-        val differentValue: Boolean
-        differentSuit = dealtHandCards.all {
-            it.suit != dealtHandCards[0].suit
-        }
-        if(differentSuit) {
-            differentValue = dealtHandCards.all {
-                it.value != dealtHandCards[0].value
-            }
-        }
-        else {
-            differentValue = true
-        }
-        if(!differentSuit || !differentValue) {
-                result = 30.5
+        if((dealtHandCards.all {it.suit.equals(dealtHandCards.get(0).suit)}) ||
+        (dealtHandCards.all {it.value.equals(dealtHandCards.get(0).value)})) {
+            result = 30.5
         }
         else {
             for (card in dealtHandCards) {
