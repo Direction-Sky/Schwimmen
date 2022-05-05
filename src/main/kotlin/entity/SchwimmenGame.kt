@@ -18,6 +18,14 @@ class SchwimmenGame constructor(
     private val deck: Deck) {
 
     /**
+     * Getter method to retrieve the private attribute passCounter
+     * @return Int
+     */
+    fun passCounter(): Int {
+        return passCounter
+    }
+
+    /**
      * Initialize players, create 32 cards using cross product, then shuffle and distribute cards
      */
     init {
