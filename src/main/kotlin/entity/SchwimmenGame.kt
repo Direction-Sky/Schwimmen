@@ -38,18 +38,8 @@ class SchwimmenGame constructor(
             CardSuit.HEARTS,
             CardSuit.DIAMONDS
         )
-        val values: List<CardValue> = listOf(
-            CardValue.SEVEN,
-            CardValue.EIGHT,
-            CardValue.NINE,
-            CardValue.TEN,
-            CardValue.JACK,
-            CardValue.QUEEN,
-            CardValue.KING,
-            CardValue.ACE
-        )
         for (suit in suits) {
-            for (value in values) {
+            for (value in CardValue.shortDeck()) {
                 deck.cards.add(SchwimmenCard(suit, value))
             }
         }
@@ -60,7 +50,7 @@ class SchwimmenGame constructor(
         }
         for (player in players) {
             deck.drawThreeCards()?.forEach{
-                player.dealtHandCards.add(it)
+                player.handCards.add(it)
             }
         }
     }

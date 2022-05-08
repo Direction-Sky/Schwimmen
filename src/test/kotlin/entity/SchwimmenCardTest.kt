@@ -13,16 +13,6 @@ class SchwimmenCardTest {
         CardSuit.HEARTS,
         CardSuit.DIAMONDS
     )
-    val values: List<CardValue> = listOf(
-        CardValue.SEVEN,
-        CardValue.EIGHT,
-        CardValue.NINE,
-        CardValue.TEN,
-        CardValue.JACK,
-        CardValue.QUEEN,
-        CardValue.KING,
-        CardValue.ACE
-    )
 
     /**
      * We need to test whether toString() is capable of producing suitable strings for each one
@@ -31,7 +21,7 @@ class SchwimmenCardTest {
     @Test
     fun toStringTest() {
         for (suit in suits) {
-            for (value in values) {
+            for (value in CardValue.shortDeck()) {
                 val card = SchwimmenCard(suit, value)
                 // Test all clubs
                 if(suit == CardSuit.CLUBS) {

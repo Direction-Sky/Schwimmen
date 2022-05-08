@@ -1,34 +1,53 @@
 package entity
 
+
 /**
  * A simple class to store a player's names and position as well as the hand.
  */
 class SchwimmenPlayer constructor(val name: String, val pos: Int) {
     var hasKnocked: Boolean = false
-    val dealtHandCards: MutableList<SchwimmenCard> = mutableListOf()
+    val handCards: MutableList<SchwimmenCard> = mutableListOf()
 
     /**
      * Calculates how much the player's hand is worth based on the rules of the game.
-     * @return Double
+     * We recognize following cases for any player at any point of the game:
+     * 1. All 3 cards have same value -> 30.5
+     * 2. Cards 1, 2 and 3 have the same suit
+     * 3. Cards 1 and 2 have the same suit
+     * 4. Cards 1 and 3 have the same suit
+     * 5. Cards 2 and 3 have the same suit
+     * 6. All cards have different suits.
+     * Since a card value ranges between 7 and 11, no single card would beat
+     * a combination of two, therefore there is no need to find the maximum.
+     * @return 30.5 if all cards have the same value, or the highest sum of cards of a suit
      */
     fun checkHandScore(): Double {
         var result: Double = 0.0
-
-        if((dealtHandCards.all {it.suit.equals(dealtHandCards.get(0).suit)}) ||
-        (dealtHandCards.all {it.value.equals(dealtHandCards.get(0).value)})) {
-            result = 30.5
+        // Case 1
+        if(handCards.all{it.value.equals(handCards.get(0).value)}) {
+            return 30.5
         }
+        // Case 2
+        else if(handCards.all {
+                result += it.points()
+                it.suit.equals(handCards.get(0).suit)}){
+            return result
+        }
+        // Case 3
+        else if(handCards[0].suit.equals(handCards[1].suit)) {
+            return result - handCards[2].points()
+        }
+        // Case 4
+        else if(handCards[0].suit.equals(handCards[2].suit)) {
+            return result - handCards[1].points() + handCards[2].points()
+        }
+        // Case 5
+        else if(handCards[1].suit.equals(handCards[2].suit)) {
+            return handCards[1].points() + handCards[2].points()
+        }
+        // Case 6
         else {
-            for (card in dealtHandCards) {
-                result += when(card.value) {
-                    CardValue.SEVEN -> 7.0
-                    CardValue.EIGHT -> 8.0
-                    CardValue.NINE -> 9.0
-                    CardValue.ACE -> 11.0
-                    else -> 10.0
-                }
-            }
+            return maxOf(handCards[0].points(), handCards[1].points(), handCards[2].points())
         }
-        return result
     }
 }

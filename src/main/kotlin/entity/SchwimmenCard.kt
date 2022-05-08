@@ -6,4 +6,17 @@ package entity
  */
 data class SchwimmenCard constructor(val suit:CardSuit, val value: CardValue) {
     override fun toString() = "$suit$value"
+
+    /**
+     * A simple function used to calculate a player's hand score
+     */
+    fun points(): Double {
+        return when(value) {
+            CardValue.SEVEN -> 7.0
+            CardValue.EIGHT -> 8.0
+            CardValue.NINE -> 9.0
+            CardValue.ACE -> 11.0
+            else -> 10.0
+        }
+    }
 }
