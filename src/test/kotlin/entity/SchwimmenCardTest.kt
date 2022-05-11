@@ -7,7 +7,7 @@ import kotlin.test.*
  */
 class SchwimmenCardTest {
 
-    val suits: List<CardSuit> = listOf(
+    private val suits = listOf(
         CardSuit.CLUBS,
         CardSuit.SPADES,
         CardSuit.HEARTS,

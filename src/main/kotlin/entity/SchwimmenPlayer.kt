@@ -8,6 +8,10 @@ class SchwimmenPlayer constructor(val name: String) {
     var hasKnocked: Boolean = false
     val handCards: MutableList<SchwimmenCard> = mutableListOf()
 
+    override fun toString(): String {
+        return name
+    }
+
     /**
      * Calculates how much the player's hand is worth based on the rules of the game.
      * Since a card value ranges between 7 and 11, no single card value can be greater than

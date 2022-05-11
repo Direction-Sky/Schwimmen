@@ -15,13 +15,13 @@ class StartGameTest {
      */
     @Test
     fun startGameTest() {
-        val pList: List<SchwimmenPlayer> = listOf(
+        val pList = listOf(
             SchwimmenPlayer("P1"),
             SchwimmenPlayer("P2"),
             SchwimmenPlayer("P3"),
             SchwimmenPlayer("P4")
         )
-        val gs: GameService = GameService()
+        val gs = GameService()
         gs.startGame(pList)
         assertTrue(gs.rootService.currentGame.gameLoop)
         assertEquals(4, gs.rootService.currentGame.players.size)
