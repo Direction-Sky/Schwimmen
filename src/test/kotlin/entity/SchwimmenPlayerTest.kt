@@ -6,7 +6,7 @@ import kotlin.test.*
  * Test class for [SchwimmenPlayer]
  */
 class SchwimmenPlayerTest {
-    val player = SchwimmenPlayer("John", 0)
+    val player = SchwimmenPlayer("John")
     val card1 = SchwimmenCard(CardSuit.CLUBS, CardValue.SEVEN)
     val card2 = SchwimmenCard(CardSuit.CLUBS, CardValue.NINE)
     val card3 = SchwimmenCard(CardSuit.CLUBS, CardValue.TEN)

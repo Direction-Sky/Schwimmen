@@ -16,7 +16,7 @@ class PlayerActionService(val rootService: RootService) {
      */
     fun turn(): Unit {
         var action: Turn
-        while(rootService.currentGame.gameLoop) {
+        while(!rootService.currentGame.gameLoop) {
             // Game rule: all players have played once after a knock
             if(afterKnock == rootService.currentGame.players.size) {
                 rootService.currentGame.gameLoop = false

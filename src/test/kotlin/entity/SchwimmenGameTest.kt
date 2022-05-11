@@ -12,7 +12,7 @@ import kotlin.test.*
  * Tester class for [SchwimmenGame]
  */
 class SchwimmenGameTest {
-    val player = SchwimmenPlayer("Test", 0)
+    val player = SchwimmenPlayer("Test")
     val game: SchwimmenGame = SchwimmenGame(
         0,
         true,
