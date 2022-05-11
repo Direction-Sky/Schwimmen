@@ -3,7 +3,7 @@ package service
 import entity.*
 
 class GameService {
-    private lateinit var rootService: RootService
+    lateinit var rootService: RootService
 
     /**
      * Initialize players, create 32 cards using cross product, then shuffle and distribute cards
@@ -30,7 +30,7 @@ class GameService {
         val newGame = SchwimmenGame(
             0,
             true,
-            deck.drawThreeCards(),
+            deck.drawThreeCards()!!,
             players,
             players[0],
             deck

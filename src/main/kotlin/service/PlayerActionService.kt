@@ -17,7 +17,9 @@ class PlayerActionService(val rootService: RootService) {
     fun turn(): Unit {
         var action: Turn
         while(!rootService.currentGame.gameLoop) {
-            // Game rule: all players have played once after a knock
+            /**
+             * Game rule: all players have played once after a knock
+             */
             if(afterKnock == rootService.currentGame.players.size) {
                 rootService.currentGame.gameLoop = false
                 continue
@@ -30,8 +32,8 @@ class PlayerActionService(val rootService: RootService) {
                 action = Turn.PASS
 
                 when(action) {
-                    Turn.PASS -> pass()
-                    Turn.KNOCK -> knock()
+                    Turn.PASS -> pass(player)
+                    Turn.KNOCK -> knock(player)
                     Turn.CHANGEONE -> changeOne(player,0,0)
                     Turn.CHANGEALL -> changeAll(player)
                 }
@@ -44,16 +46,20 @@ class PlayerActionService(val rootService: RootService) {
      * and replaced with three cards from deck.
      * If deck has insufficient cards, then game has to be ended immediately
      */
-    fun pass(): Unit {
+    fun pass(player: SchwimmenPlayer): Unit {
         rootService.currentGame.incrementPassCounter()
-        // Game rule: all players have passed -> throw table cards and draw 3 new ones
+        /**
+         * Game rule: all players have passed -> throw table cards and draw 3 new ones
+         */
         if (rootService.currentGame.passCounter() == rootService.currentGame.players.size) {
-            rootService.currentGame.tableCards?.clear()
+            rootService.currentGame.tableCards.clear()
             rootService.currentGame.deck.drawThreeCards()
-                ?.let { rootService.currentGame.tableCards?.addAll(it) }
+                ?.let { rootService.currentGame.tableCards.addAll(it) }
             rootService.currentGame.passCounter = 0
-            // Game rule: insufficient cards -> game over
-            if (rootService.currentGame.tableCards?.size == 0) {
+            /**
+             * Game rule: insufficient cards -> game over
+             */
+            if (rootService.currentGame.tableCards.size == 0) {
                 rootService.currentGame.gameLoop = false
             }
         }
@@ -62,7 +68,7 @@ class PlayerActionService(val rootService: RootService) {
     /**
      * Once a player has knocked, a countdown is started, so that each player gets exactly one turn after.
      */
-    fun knock(): Unit {
+    fun knock(player: SchwimmenPlayer): Unit {
         if(afterKnock == 0) {
             afterKnock++
         }
@@ -77,13 +83,13 @@ class PlayerActionService(val rootService: RootService) {
         val playerCard: SchwimmenCard = player.handCards[hand] // ...
         val tableCard: SchwimmenCard = player.handCards[1] // ...
 
-        rootService.currentGame.tableCards?.let {
+        rootService.currentGame.tableCards.let {
             // Take from table cards and add it to hand cards
             player.handCards.add(it.removeAt(rootService.currentGame.tableCards.indexOf(tableCard)))
             // Vice versa
             it.add(player.handCards.removeAt(player.handCards.indexOf(playerCard)))
         }
-        rootService.currentGame.tableCards?.add(
+        rootService.currentGame.tableCards.add(
             player.handCards.removeAt(player.handCards.indexOf(playerCard)))
 
         rootService.currentGame.passCounter = 0
@@ -95,7 +101,7 @@ class PlayerActionService(val rootService: RootService) {
      */
     fun changeAll(player: SchwimmenPlayer): Unit {
         for(i in 1..3) {
-            rootService.currentGame.tableCards?.let {
+            rootService.currentGame.tableCards.let {
                 player.handCards.add(it.removeFirst())
                 it.add(player.handCards.removeFirst())
             }

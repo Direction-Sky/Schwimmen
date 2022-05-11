@@ -12,7 +12,7 @@ package entity
 class SchwimmenGame constructor(
     var passCounter: Int,
     var gameLoop: Boolean,
-    val tableCards: MutableList<SchwimmenCard>?,
+    val tableCards: MutableList<SchwimmenCard>,
     val players: List<SchwimmenPlayer>,
     var currentPlayer: SchwimmenPlayer,
     val deck: Deck) {
