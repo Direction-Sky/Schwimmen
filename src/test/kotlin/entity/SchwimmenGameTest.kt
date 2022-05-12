@@ -1,11 +1,5 @@
 package entity
 
-import entity.CardSuit
-import entity.CardValue
-import entity.SchwimmenPlayer
-import entity.SchwimmenCard
-import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
 import kotlin.test.*
 
 /**
@@ -18,7 +12,6 @@ class SchwimmenGameTest {
         true,
         mutableListOf(),
         listOf(),
-        player,
         Deck(mutableListOf())
     )
 

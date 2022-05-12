@@ -6,7 +6,6 @@ package entity
  * @param gameLoop - true means game is still running. Can be modified.
  * @param tableCards - is a mutable list of 3 uncovered cards on the table.
  * @param players - is a list of participating players.
- * @param currentPlayer - to know whose turn it is.
  * @param deck - is a [Deck] object that is initialized with 32 cards.
  */
 class SchwimmenGame constructor(
@@ -14,7 +13,6 @@ class SchwimmenGame constructor(
     var gameLoop: Boolean,
     val tableCards: MutableList<SchwimmenCard>,
     val players: List<SchwimmenPlayer>,
-    var currentPlayer: SchwimmenPlayer,
     val deck: Deck) {
 
     /**

@@ -32,7 +32,6 @@ class GameService {
             true,
             deck.drawThreeCards()!!,
             players,
-            players[0],
             deck
         )
         rootService = RootService(newGame, this)

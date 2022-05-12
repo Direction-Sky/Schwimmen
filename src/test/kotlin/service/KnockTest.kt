@@ -3,7 +3,6 @@ package service
 import entity.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 /**
  * Tester class for [PlayerActionService.knock]

@@ -34,7 +34,7 @@ class PlayerActionService(val rootService: RootService) {
                 when(action) {
                     Turn.PASS -> pass(player)
                     Turn.KNOCK -> knock(player)
-                    Turn.CHANGEONE -> changeOne(player,0,0)
+                    Turn.CHANGEONE -> changeOne(player,null ,null)
                     Turn.CHANGEALL -> changeAll(player)
                 }
             }
@@ -79,19 +79,15 @@ class PlayerActionService(val rootService: RootService) {
      * Swaps two selected cards between table and hand.
      * @param player - the person whose turn it is.
      */
-    fun changeOne(player: SchwimmenPlayer, hand: Int, table: Int): Unit {
-        val playerCard: SchwimmenCard = player.handCards[hand] // ...
-        val tableCard: SchwimmenCard = player.handCards[1] // ...
-
+    fun changeOne(player: SchwimmenPlayer, hand: SchwimmenCard?, table: SchwimmenCard?): Unit {
         rootService.currentGame.tableCards.let {
-            // Take from table cards and add it to hand cards
-            player.handCards.add(it.removeAt(rootService.currentGame.tableCards.indexOf(tableCard)))
-            // Vice versa
-            it.add(player.handCards.removeAt(player.handCards.indexOf(playerCard)))
+            val tableIndex = rootService.currentGame.tableCards.indexOf(table)
+            val handIndex = player.handCards.indexOf(hand)
+            it.remove(table)
+            player.handCards.remove(hand)
+            hand?.let { h -> it.add(tableIndex, h) }
+            table?.let { t -> player.handCards.add(handIndex, t) }
         }
-        rootService.currentGame.tableCards.add(
-            player.handCards.removeAt(player.handCards.indexOf(playerCard)))
-
         rootService.currentGame.passCounter = 0
     }
 
