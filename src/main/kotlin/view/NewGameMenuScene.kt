@@ -14,11 +14,22 @@ import tools.aqua.bgw.dialog.Dialog
 import tools.aqua.bgw.dialog.DialogType
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
+import tools.aqua.bgw.visual.CompoundVisual
 import tools.aqua.bgw.visual.ImageVisual
 import java.awt.Color
 import java.net.URL
 
+/**
+ * @property universalFont is the standard font used in this project.
+ */
 class NewGameMenuScene(val app: BoardGameApplication, private val rootService: RootService): MenuScene(1920, 1080), Refreshable {
+
+
+    private val globalFont: Font = Font(size = 36, family = "Comic Sans MS", fontWeight = Font.FontWeight.SEMI_BOLD)
+    private val namesList = listOf(
+        "Nick", "Ahmad", "Ali", "Kareem", "Lasse",
+        "Jan", "Christos", "Florian", "Nils", "Ibrahim"
+    )
 
     /**
      * First things first
@@ -65,9 +76,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                             "- All cards have same value -> 30.5.\n" +
                             "- Cards of the same suit can be summed together.\n" +
                             "- 10, J, Q, K -> 10, A -> 11\n" +
-                            "- If a full round is passed, 3 new cards from deck\n" +
-                            "  are to be drawn and replace the old table cards.\n" +
-                            "- In case a full round is passed and deck has less\n" +
+                            "- If a full circle is passed, 3 new cards from deck\n" +
+                            "  are to be drawn replacing the old table cards.\n" +
+                            "- In case a full circle is passed and deck has less\n" +
                             "  than three cards, game will end on the spot.\n" +
                             "- If someone knocks, each player gets to play one\n" +
                             "  turn and then game will end.\n\n" +
@@ -128,7 +139,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p3Label.isDisabled = false
                 p3Label.visual = ImageVisual("Player3.png")
                 p3Input.isDisabled = false
-                p3Input.text = listOf("Homer", "Marge", "Bart", "Lisa", "Maggie").random()
+                p3Input.text = namesList.random()
                 removeButton3.isDisabled = false
                 removeButton3.visual = ImageVisual("RemoveButton.png")
                 this.visual = ColorVisual(0,0,0,0)
@@ -154,7 +165,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p4Label.isDisabled = false
                 p4Label.visual = ImageVisual("Player4.png")
                 p4Input.isDisabled = false
-                p4Input.text = listOf("Homer", "Marge", "Bart", "Lisa", "Maggie").random()
+                p4Input.text = namesList.random()
                 removeButton3.isDisabled = true
                 removeButton3.visual = ColorVisual(0,0,0,0)
                 removeButton4.isDisabled = false
@@ -224,9 +235,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
 
     private val p1Input = TextField(
         width = 428, height = 90, posX = 795, posY = 367 - 45,
-        text = listOf("Homer", "Marge", "Bart", "Lisa", "Maggie").random(),
-        font = Font(size = 32, family = "Boogaloo"),
-        prompt = "Enter name for player 1",
+        text = namesList.random(),
+        font = globalFont,
+        prompt = "Enter name",
     ).apply {
         onKeyTyped = {
             countPlayers()
@@ -235,9 +246,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
 
     private val p2Input = TextField(
         width = 428, height = 90, posX = 795, posY = 476 - 45,
-        text = listOf("Homer", "Marge", "Bart", "Lisa", "Maggie").random(),
-        font = Font(size = 32, family = "Boogaloo"),
-        prompt = "Enter name for player 2"
+        text = namesList.random(),
+        font = globalFont,
+        prompt = "Enter name",
     ).apply {
         onKeyTyped = {
             countPlayers()
@@ -247,8 +258,8 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p3Input = TextField(
         width = 428, height = 90, posX = 795, posY = 587 - 45,
         text = "Add player 3",
-        prompt = "Enter name for player 3",
-        font = Font(size = 32, family = "Boogaloo")
+        font = globalFont,
+        prompt = "Enter name",
     ).apply {
         this.isDisabled = true
         onKeyTyped = {
@@ -259,8 +270,8 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p4Input = TextField(
         width = 428, height = 90, posX = 795, posY = 697 - 45,
         text = "Add player 4",
-        prompt = "Enter name for player 4",
-        font = Font(size = 32, family = "Boogaloo")
+        font = globalFont,
+        prompt = "Enter name",
     ).apply {
         this.isDisabled = true
         onKeyTyped = {
@@ -306,7 +317,6 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     val exitButton = Button(
         width = 222, height =  107, posX = 75, posY = 871,
         alignment = Alignment.CENTER,
-        font = Font(30, Color.WHITE, fontWeight = Font.FontWeight.BOLD),
         visual = ImageVisual("ExitButton.png"),
 
     ).apply {
@@ -321,8 +331,11 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     }
 
     init {
-        background = ImageVisual("background.jpg", 1920, 1080)
-        opacity = 1.0
+        background = CompoundVisual(
+            ImageVisual("Background.jpg"),
+            ColorVisual(70,40,120,100)
+        )
+        opacity = .3
         addComponents(
             tuLogo, headlineLabel, helpButton,
             p1Label, p1Input,

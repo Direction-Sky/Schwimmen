@@ -2,6 +2,7 @@ package view
 
 import service.*
 import tools.aqua.bgw.core.BoardGameApplication
+import tools.aqua.bgw.visual.ImageVisual
 
 class SchwimmenApplication: BoardGameApplication("Schwimmen Game ♣ developed at TU Dortmund, Germany"), Refreshable {
     private val rootService = RootService()
@@ -15,7 +16,7 @@ class SchwimmenApplication: BoardGameApplication("Schwimmen Game ♣ developed a
     }
 
     init {
-
+        this.icon = ImageVisual("SchwimmenIcon.png")
         // all scenes and the application itself need too
         // react to changes done in the service layer
         rootService.addRefreshables(
