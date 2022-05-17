@@ -21,6 +21,4 @@ enum class CardSuit {
         HEARTS -> "Hearts " //"♥"
         DIAMONDS -> "Diamonds " //"♦"
     }
-
-
 }

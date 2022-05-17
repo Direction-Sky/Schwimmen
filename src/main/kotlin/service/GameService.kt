@@ -2,21 +2,19 @@ package service
 
 import entity.*
 
-class GameService {
-    lateinit var rootService: RootService
+/**
+ * This class is used to manage [SchwimmenGame], that represents the current state of the game.
+ */
+class GameService(val rootService: RootService): AbstractRefreshingService() {
 
     /**
-     * Initialize players, create 32 cards using cross product, then shuffle and distribute cards
+     * Initialize players, create 32 cards using cross product, then shuffle and distribute cards.
+     * @param players is the list of assigned players that will be forwarded in order to create
+     * a [SchwimmenGame] instance.
      */
     fun startGame(players: List<SchwimmenPlayer>): Unit {
         val deck = Deck(mutableListOf())
-        val suits: List<CardSuit> = listOf(
-            CardSuit.CLUBS,
-            CardSuit.SPADES,
-            CardSuit.HEARTS,
-            CardSuit.DIAMONDS
-        )
-        for (suit in suits) {
+        for (suit in listOf(CardSuit.CLUBS, CardSuit.SPADES, CardSuit.HEARTS, CardSuit.DIAMONDS)) {
             for (value in CardValue.shortDeck()) {
                 deck.cards.add(SchwimmenCard(suit, value))
             }
@@ -27,21 +25,9 @@ class GameService {
                 player.handCards.add(it)
             }
         }
-        val newGame = SchwimmenGame(
-            0,
-            true,
-            deck.drawThreeCards()!!,
-            players,
-            deck
-        )
-        rootService = RootService(newGame, this)
-    }
-
-    fun isGameOver(): Boolean {
-        return !rootService.retrieveCurrentGame().gameLoop
-    }
-
-    fun endGame(): Unit {
-        rootService.retrieveCurrentGame().gameLoop = false
+        deck.drawThreeCards()?.let {
+            val newGame = SchwimmenGame(0, true, it, players, deck)
+            rootService.currentGame = newGame
+        }
     }
 }

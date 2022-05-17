@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 /**
- * Tester class for [PlayerActionService.changeAll]
+ * Tester class for [PlayerActionService.changeAll].
  */
 class ChangeAllTest {
     private val pList = listOf(
@@ -16,20 +16,24 @@ class ChangeAllTest {
         SchwimmenPlayer("P4")
     )
 
+    /**
+     * Testing method for [PlayerActionService.changeAll].
+     */
     @Test
     fun changeAllTest() {
-        val gs = GameService()
+        val rs = RootService()
+        val gs = GameService(rs)
         gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
-        val oldTable = "${gs.rootService.currentGame.tableCards}"
+        val oldTable = "${gs.rootService.currentGame!!.tableCards}"
         println("Table before swapping all: $oldTable")
-        val oldHand = "${gs.rootService.currentGame.players[0].handCards}"
+        val oldHand = "${gs.rootService.currentGame!!.players[0].handCards}"
         println("Hand before swapping all: $oldHand")
-        pas.changeAll(gs.rootService.currentGame.players[0])
-        println("Table after swapping all: ${gs.rootService.currentGame.tableCards}")
-        println("Hand after swapping all: ${gs.rootService.currentGame.players[0].handCards}")
-        assertNotEquals(oldTable,"${gs.rootService.currentGame.tableCards}")
-        assertNotEquals(oldHand,"${gs.rootService.currentGame.players[0].handCards}")
-        assertEquals(0, gs.rootService.currentGame.passCounter)
+        pas.changeAll(gs.rootService.currentGame!!.players[0])
+        println("Table after swapping all: ${gs.rootService.currentGame!!.tableCards}")
+        println("Hand after swapping all: ${gs.rootService.currentGame!!.players[0].handCards}")
+        assertNotEquals(oldTable,"${gs.rootService.currentGame!!.tableCards}")
+        assertNotEquals(oldHand,"${gs.rootService.currentGame!!.players[0].handCards}")
+        assertEquals(0, gs.rootService.currentGame!!.passCounter)
     }
 }

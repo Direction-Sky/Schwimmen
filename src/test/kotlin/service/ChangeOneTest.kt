@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 /**
- * Tester class for [PlayerActionService.changeOne]
+ * Tester class for [PlayerActionService.changeOne].
  */
 class ChangeOneTest {
     private val pList = listOf(
@@ -16,28 +16,30 @@ class ChangeOneTest {
         SchwimmenPlayer("P4")
     )
 
+    /**
+     * Test method for [PlayerActionService.changeOne].
+     * Hand card and table card are randomly selected using [random].
+     */
     @Test
     fun changeOneTest() {
-        val gs = GameService()
+        val rs = RootService()
+        val gs = GameService(rs)
         gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
-        val oldTable = "${gs.rootService.currentGame.tableCards}"
+        val oldTable = "${gs.rootService.currentGame!!.tableCards}"
         println("Table before swapping: $oldTable")
-        val oldHand = "${gs.rootService.currentGame.players[0].handCards}"
+        val oldHand = "${gs.rootService.currentGame!!.players[0].handCards}"
         println("Hand before swapping: $oldHand")
-        val hand = (0..2).random()
-        val table = (0..2).random()
-        println("Swapping card ${gs.rootService.currentGame.players[0].handCards[hand]} from hand with " +
-                "${gs.rootService.currentGame.tableCards[table]} from table:")
-        pas.changeOne(
-            gs.rootService.currentGame.players[0],
-            gs.rootService.currentGame.players[0].handCards[hand],
-            gs.rootService.currentGame.tableCards[table]
-        )
-        assertNotEquals(oldTable, "${gs.rootService.currentGame.tableCards}")
-        assertNotEquals(oldHand, "${gs.rootService.currentGame.players[0].handCards}")
-        println("Table after swapping: ${gs.rootService.currentGame.tableCards}")
-        println("Hand after swapping: ${gs.rootService.currentGame.players[0].handCards}")
-        assertEquals(0, gs.rootService.currentGame.passCounter)
+        val hand = gs.rootService.currentGame!!.players[0].handCards.random()
+        val table = gs.rootService.currentGame!!.tableCards.random()
+        println("Swapping card $hand from hand with $table from table:")
+
+        pas.changeOne(gs.rootService.currentGame!!.players[0], hand, table)
+
+        assertNotEquals(oldTable, "${gs.rootService.currentGame!!.tableCards}")
+        assertNotEquals(oldHand, "${gs.rootService.currentGame!!.players[0].handCards}")
+        println("Table after swapping: ${gs.rootService.currentGame!!.tableCards}")
+        println("Hand after swapping: ${gs.rootService.currentGame!!.players[0].handCards}")
+        assertEquals(0, gs.rootService.currentGame!!.passCounter)
     }
 }

@@ -20,14 +20,15 @@ class StartGameTest {
             SchwimmenPlayer("P3"),
             SchwimmenPlayer("P4")
         )
-        val gs = GameService()
+        val rs = RootService()
+        val gs = GameService(rs)
         gs.startGame(pList)
-        assertTrue(gs.rootService.currentGame.gameLoop)
-        assertEquals(4, gs.rootService.currentGame.players.size)
-        assertEquals("P1", gs.rootService.currentGame.players[0].name)
-        assertEquals("P2", gs.rootService.currentGame.players[1].name)
-        assertEquals("P3", gs.rootService.currentGame.players[2].name)
-        assertEquals("P4", gs.rootService.currentGame.players[3].name)
-        assertEquals(17, gs.rootService.currentGame.deck.cards.size)
+        assertTrue(gs.rootService.currentGame!!.gameLoop)
+        assertEquals(4, gs.rootService.currentGame!!.players.size)
+        assertEquals("P1", gs.rootService.currentGame!!.players[0].name)
+        assertEquals("P2", gs.rootService.currentGame!!.players[1].name)
+        assertEquals("P3", gs.rootService.currentGame!!.players[2].name)
+        assertEquals("P4", gs.rootService.currentGame!!.players[3].name)
+        assertEquals(17, gs.rootService.currentGame!!.deck.cards.size)
     }
 }

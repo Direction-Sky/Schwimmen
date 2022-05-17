@@ -10,6 +10,9 @@ enum class Turn {
     CHANGEALL,
     ;
 
+    /**
+     * This function is used in implemented for representation purposes.
+     */
     override fun toString() = when(this) {
         Turn.PASS -> "Pass"
         Turn.KNOCK -> "Knock"
