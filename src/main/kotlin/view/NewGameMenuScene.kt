@@ -16,6 +16,7 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.CompoundVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.Visual
 import java.awt.Color
 import java.net.URL
 
@@ -34,6 +35,62 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     /**
      * First things first
      */
+    private val tuButton = Button(
+        width = 192, height =  192, posX = 108, posY = 70,
+        visual = ImageVisual("TUButton.png")
+    ).apply {
+        if(!this.isDisabled) {
+            onMouseEntered = {
+                this.visual = ImageVisual("TUButtonHover.png")
+            }
+            onMouseExited = {
+                this.visual = ImageVisual("TUButton.png")
+            }
+            onMouseClicked = {
+                app.showDialog(Dialog(
+                    dialogType = DialogType.INFORMATION,
+                    title = "TU Dortmund",
+                    header = "Technische Universität Dortmund",
+                    message = "https://www.tu-dortmund.de/"
+                ))
+            }
+        }
+    }
+
+
+    private val helpButton = Button(
+        width = 192, height =  192, posX = 1620, posY = 70,
+        visual = ImageVisual("HelpButton.png")
+    ).apply {
+        if(!this.isDisabled) {
+            onMouseEntered = {
+                this.visual = ImageVisual("HelpButtonHover.png")
+            }
+            onMouseExited = {
+                this.visual = ImageVisual("HelpButton.png")
+            }
+            onMouseClicked = {
+                app.showDialog(Dialog(
+                    dialogType = DialogType.INFORMATION,
+                    title = "How to play",
+                    header = "",
+                    message = "- Player with highest score wins.\n" +
+                        "- All cards have same value -> 30.5.\n" +
+                        "- Cards of the same suit can be summed together.\n" +
+                        "- 10, J, Q, K -> 10, A -> 11\n" +
+                        "- If a full circle is passed, 3 new cards from deck\n" +
+                        "  are to be drawn replacing the old table cards.\n" +
+                        "- In case a full circle is passed and deck has less\n" +
+                        "  than three cards, game will end on the spot.\n" +
+                        "- If someone knocks, each player gets to play one\n" +
+                        "  turn and then game will end.\n\n" +
+                        "Good luck and have fun!"
+                ))
+            }
+        }
+    }
+
+    /*
     private val tuLogo = Button(
         width = 540, height =  138, posX = 670, posY = 850,
         visual = ImageVisual("TULogo.png")
@@ -55,38 +112,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
             }
         }
     }
-
-    private val helpButton = Button(
-        width = 192, height =  192, posX = 1620, posY = 70,
-        visual = ImageVisual("HelpButton.png")
-        ).apply {
-        if(!this.isDisabled) {
-            onMouseEntered = {
-                this.visual = ImageVisual("HelpButtonHover.png")
-            }
-            onMouseExited = {
-                this.visual = ImageVisual("HelpButton.png")
-            }
-            onMouseClicked = {
-                app.showDialog(Dialog(
-                    dialogType = DialogType.INFORMATION,
-                    title = "How to play",
-                    header = "",
-                    message = "- Player with highest score wins.\n" +
-                            "- All cards have same value -> 30.5.\n" +
-                            "- Cards of the same suit can be summed together.\n" +
-                            "- 10, J, Q, K -> 10, A -> 11\n" +
-                            "- If a full circle is passed, 3 new cards from deck\n" +
-                            "  are to be drawn replacing the old table cards.\n" +
-                            "- In case a full circle is passed and deck has less\n" +
-                            "  than three cards, game will end on the spot.\n" +
-                            "- If someone knocks, each player gets to play one\n" +
-                            "  turn and then game will end.\n\n" +
-                            "Good luck and have fun!"
-                ))
-            }
-        }
-    }
+    */
 
     private val headlineLabel = Label(
         width = 876, height = 152, posX = 522, posY = 85,
@@ -109,7 +135,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p3Label = Label(
         width = 158, height = 65, posX = 578, posY = 555,
         text  = "",
-        visual = ColorVisual(0,0,0,0)
+        visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
     }
@@ -117,7 +143,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p4Label = Label(
         width = 158, height = 65, posX = 578, posY = 659,
         text  = "",
-        visual = ColorVisual(0,0,0,0)
+        visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
     }
@@ -142,7 +168,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p3Input.text = namesList.random()
                 removeButton3.isDisabled = false
                 removeButton3.visual = ImageVisual("RemoveButton.png")
-                this.visual = ColorVisual(0,0,0,0)
+                this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
             }
@@ -167,10 +193,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p4Input.isDisabled = false
                 p4Input.text = namesList.random()
                 removeButton3.isDisabled = true
-                removeButton3.visual = ColorVisual(0,0,0,0)
+                removeButton3.visual = Visual.EMPTY
                 removeButton4.isDisabled = false
                 removeButton4.visual = ImageVisual("RemoveButton.png")
-                this.visual = ColorVisual(0,0,0,0)
+                this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
             }
@@ -179,7 +205,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
 
     private val removeButton3: Button = Button(
         width = 90, height =  90, posX = 1300, posY = 550,
-        visual = ColorVisual(0,0,0,0)
+        visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
         onMouseEntered = {
@@ -190,13 +216,13 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
         onMouseClicked = {
             if(!this.isDisabled) {
-                this.visual = ColorVisual(0,0,0,0)
+                this.visual = Visual.EMPTY
                 p3Input.text = "Add player 3"
                 p3Input.isDisabled = true
                 addButton3.isDisabled = false
                 addButton3.visual = ImageVisual("AddButton.png")
                 p3Label.isDisabled = true
-                p3Label.visual = ColorVisual(0,0,0,0)
+                p3Label.visual = Visual.EMPTY
                 addButton4.visual = ImageVisual("AddButtonDisabled.png")
                 addButton4.isDisabled = true
                 this.isDisabled = true
@@ -207,7 +233,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
 
     private val removeButton4: Button = Button(
         width = 90, height =  90, posX = 1300, posY = 650,
-        visual = ColorVisual(0,0,0,0)
+        visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
         onMouseEntered = {
@@ -221,12 +247,12 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p4Input.text = "Add player 4"
                 p4Input.isDisabled = true
                 p4Label.isDisabled = true
-                p4Label.visual = ColorVisual(0,0,0,0)
+                p4Label.visual = Visual.EMPTY
                 addButton4.isDisabled = false
                 addButton4.visual = ImageVisual("AddButton.png")
                 removeButton3.isDisabled = false
                 removeButton3.visual = ImageVisual("RemoveButton.png")
-                this.visual = ColorVisual(0,0,0,0)
+                this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
             }
@@ -337,7 +363,8 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         )
         opacity = .3
         addComponents(
-            tuLogo, headlineLabel, helpButton,
+            helpButton, tuButton,
+            headlineLabel,
             p1Label, p1Input,
             p2Label, p2Input,
             addButton3, p3Label, p3Input, removeButton3,
