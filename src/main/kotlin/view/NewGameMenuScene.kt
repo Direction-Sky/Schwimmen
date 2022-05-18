@@ -21,15 +21,29 @@ import java.awt.Color
 import java.net.URL
 
 /**
- * @property universalFont is the standard font used in this project.
+ * This is the main menu screen. Players list sizing 2 - 4 players will be constructed and
+ * forwarded from here to [SchwimmenGameScene].
+ * @param app is the [SchwimmenApplication] that allows showing dialog popups.
+ * @param rootService is the core that holds every part of this project connected.
  */
-class NewGameMenuScene(val app: BoardGameApplication, private val rootService: RootService): MenuScene(1920, 1080), Refreshable {
+class NewGameMenuScene(val app: BoardGameApplication, private val rootService: RootService):
+    MenuScene(1920, 1080), Refreshable {
 
+    /**
+     * Global font.
+     */
+    val globalFont: Font = Font(
+        size = 36,
+        family = "Comic Sans MS",
+        fontWeight = Font.FontWeight.SEMI_BOLD
+    )
 
-    private val globalFont: Font = Font(size = 36, family = "Comic Sans MS", fontWeight = Font.FontWeight.SEMI_BOLD)
+    /**
+     * Great personalities.
+     */
     private val namesList = listOf(
-        "Nick", "Ahmad", "Ali", "Kareem", "Lasse",
-        "Jan", "Christos", "Florian", "Nils", "Ibrahim"
+        "Nick", "Ahmad", "Ali", "Kareem", "Florian",
+        "Jan", "Christos", "Ibrahim", "Nils", "Lasse"
     )
 
     /**
@@ -57,7 +71,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
-
+    /**
+     * Shows game rules as dialog window.
+     */
     private val helpButton = Button(
         width = 192, height =  192, posX = 1620, posY = 70,
         visual = ImageVisual("HelpButton.png")
@@ -114,24 +130,37 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     }
     */
 
+    /**
+     * Schwimmen title in the middle top of the screen.
+     */
     private val headlineLabel = Label(
         width = 876, height = 152, posX = 522, posY = 85,
         text = "",
         visual = ImageVisual("Schwimmen.png")
     )
 
+    /**
+     * Player 1 label on the left. Permanently visible.
+     */
     private val p1Label = Label(
         width = 158, height = 65, posX = 578, posY = 347,
         text  = "",
         visual = ImageVisual("Player1.png")
     )
 
+    /**
+     * Player 2 label on the left. Permanently visible.
+     */
     private val p2Label = Label(
         width = 158, height = 65, posX = 578, posY = 451,
         text  = "",
         visual = ImageVisual("Player2.png")
     )
 
+    /**
+     * Player 3 label on the left. Visible when player is added using [addButton3],
+     * and disappears upon clicking [removeButton3].
+     */
     private val p3Label = Label(
         width = 158, height = 65, posX = 578, posY = 555,
         text  = "",
@@ -140,6 +169,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         this.isDisabled = true
     }
 
+    /**
+     * Player 4 label on the left. Visible when player is added using [addButton4],
+     * and disappears upon clicking [removeButton4].
+     */
     private val p4Label = Label(
         width = 158, height = 65, posX = 578, posY = 659,
         text  = "",
@@ -148,6 +181,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         this.isDisabled = true
     }
 
+    /**
+     * Adds [p3Label] and [removeButton3] and activates [p3Input] and [addButton4]. Also removes iteslf.
+     */
     private val addButton3 = Button(
         width = 90, height =  90, posX = 620, posY = 550,
         visual = ImageVisual("AddButton.png")
@@ -175,6 +211,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Adds [p4Label] and [removeButton4], activates [p4Input], and removes itself with [removeButton3].
+     */
     private val addButton4 = Button(
         width = 90, height =  90, posX = 620, posY = 650,
         visual = ImageVisual("AddButtonDisabled.png")
@@ -203,6 +242,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Removes [p3Label] and itself, deactivates [p3Input] and adds [addButton3].
+     */
     private val removeButton3: Button = Button(
         width = 90, height =  90, posX = 1300, posY = 550,
         visual = Visual.EMPTY
@@ -231,6 +273,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Removes [p4Label] and itself, deactivates [p4Input] and adds [removeButton3], [addButton3].
+     */
     private val removeButton4: Button = Button(
         width = 90, height =  90, posX = 1300, posY = 650,
         visual = Visual.EMPTY
@@ -259,6 +304,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Input field for player 1's name. Permanently enabled.
+     */
     private val p1Input = TextField(
         width = 428, height = 90, posX = 795, posY = 367 - 45,
         text = namesList.random(),
@@ -270,6 +318,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Input field for player 2's name. Permanently enabled.
+     */
     private val p2Input = TextField(
         width = 428, height = 90, posX = 795, posY = 476 - 45,
         text = namesList.random(),
@@ -281,6 +332,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Input field for player 1's name. Enabled upon clicking [addButton3],
+     * and disabled upon clicking [removeButton3].
+     */
     private val p3Input = TextField(
         width = 428, height = 90, posX = 795, posY = 587 - 45,
         text = "Add player 3",
@@ -293,6 +348,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Input field for player 1's name. Enabled upon clicking [addButton4],
+     * and disabled upon clicking [removeButton4].
+     */
     private val p4Input = TextField(
         width = 428, height = 90, posX = 795, posY = 697 - 45,
         text = "Add player 4",
@@ -305,6 +364,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * Starts the game, transitioning into [SchwimmenGameScene]. Enabled if at least 2/4 players at entered.
+     * This guarantee is provided by the function [countPlayers].
+     */
     private val startButton = Button(
         width = 222, height =  107, posX = 1624, posY = 871,
         alignment = Alignment.CENTER,
@@ -340,6 +403,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
+    /**
+     * GG
+     */
     val exitButton = Button(
         width = 222, height =  107, posX = 75, posY = 871,
         alignment = Alignment.CENTER,
@@ -376,16 +442,26 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
 
     /**
      * This function serves as a security layer to prevent starting the game with
-     * less than 2 players.
-     * It can enable / disable the "Start" button.
+     * less than 2 players. It is called upon any change in the input value in each of
+     * [p1Input], [p2Input], [p3Input] and [p4Input] as well as upon clicking any of
+     * [addButton3], [addButton4], [removeButton3] and [removeButton4].
+     * It can enable / disable the "Start" button depending on how many valid player names in total are entered.
      * @return the number of entered player names (spaces don't count).
      */
     private fun countPlayers(): Int {
         var n = 2
-        if(p1Input.text.isBlank()) n--
-        if(p2Input.text.isBlank()) n--
-        if(!p3Input.isDisabled && !p3Input.text.isBlank()) n++
-        if(!p4Input.isDisabled && !p4Input.text.isBlank()) n++
+        if(p1Input.text.isBlank()) {
+            n--
+        }
+        if(p2Input.text.isBlank()) {
+            n--
+        }
+        if(!p3Input.isDisabled && !p3Input.text.isBlank()) {
+            n++
+        }
+        if(!p4Input.isDisabled && !p4Input.text.isBlank()) {
+            n++
+        }
         if(n >= 2) {
             startButton.isDisabled = false
             startButton.visual = ImageVisual("StartButton.png")

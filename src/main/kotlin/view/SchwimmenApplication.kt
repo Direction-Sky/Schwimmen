@@ -16,7 +16,7 @@ class SchwimmenApplication: BoardGameApplication("Schwimmen Game ♣ developed a
     }
 
     init {
-        this.icon = ImageVisual("SchwimmenIcon.png")
+        this.icon = ImageVisual("SchwimmenIcon2.png")
         // all scenes and the application itself need too
         // react to changes done in the service layer
         rootService.addRefreshables(
