@@ -4,7 +4,7 @@ import service.*
 import tools.aqua.bgw.core.BoardGameApplication
 import tools.aqua.bgw.visual.ImageVisual
 
-class SchwimmenApplication: BoardGameApplication("Schwimmen Game ♣ developed at TU Dortmund, Germany"), Refreshable {
+class SchwimmenApplication: BoardGameApplication("♦ Schwimmen ♦"), Refreshable {
     private val rootService = RootService()
 
     private val gameScene = SchwimmenGameScene(rootService)
@@ -31,12 +31,12 @@ class SchwimmenApplication: BoardGameApplication("Schwimmen Game ♣ developed a
         //rootService.gameService.startGame("Bob", "Alice")
 
         this.showGameScene(gameScene)
-        this.showMenuScene(newGameMenuScene, 0)
+        this.showMenuScene(newGameMenuScene, 500)
 
     }
 
     override fun refreshAfterStartNewGame() {
-        this.hideMenuScene()
+        this.hideMenuScene(500)
     }
 
     override fun refreshAfterGameEnd() {

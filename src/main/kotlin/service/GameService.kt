@@ -29,5 +29,7 @@ class GameService(val rootService: RootService): AbstractRefreshingService() {
             val newGame = SchwimmenGame(0, true, it, players, deck)
             rootService.currentGame = newGame
         }
+
+        onAllRefreshables { refreshAfterStartNewGame() }
     }
 }

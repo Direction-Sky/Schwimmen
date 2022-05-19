@@ -33,9 +33,22 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Global font.
      */
     val globalFont: Font = Font(
-        size = 36,
+        size = 36, color = Color.WHITE,
         family = "Comic Sans MS",
-        fontWeight = Font.FontWeight.SEMI_BOLD
+        fontWeight = Font.FontWeight.SEMI_BOLD,
+    )
+
+
+    /**
+     * CSS for JavaFX. Used for styling the text fields.
+     */
+    private val style: String = (
+        "-fx-background-color: rgba(0, 0, 0, 0.0);" +
+        "-fx-background-image: url('TextInputField.png');" +
+        "-fx-background-size: cover;" +
+        // "-fx-src: url('/font/Boogaloo-Regular.ttf');" +
+        //"-fx-font-family: 'Boogaloo'" +
+        "-fx-alignment: center;"
     )
 
     /**
@@ -49,7 +62,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     /**
      * First things first
      */
-    private val tuButton = Button(
+    private val tuButton = Label(
         width = 192, height =  192, posX = 108, posY = 70,
         visual = ImageVisual("TUButton.png")
     ).apply {
@@ -59,6 +72,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
             }
             onMouseExited = {
                 this.visual = ImageVisual("TUButton.png")
+            }
+            onMousePressed = {
+                this.visual = ImageVisual("TUButtonPressed.png")
             }
             onMouseClicked = {
                 app.showDialog(Dialog(
@@ -72,9 +88,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     }
 
     /**
-     * Shows game rules as dialog window.
+     * Shows game rules as a dialog window.
      */
-    private val helpButton = Button(
+    private val helpButton = Label(
         width = 192, height =  192, posX = 1620, posY = 70,
         visual = ImageVisual("HelpButton.png")
     ).apply {
@@ -84,6 +100,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
             }
             onMouseExited = {
                 this.visual = ImageVisual("HelpButton.png")
+            }
+            onMousePressed = {
+                this.visual = ImageVisual("HelpButtonPressed.png")
             }
             onMouseClicked = {
                 app.showDialog(Dialog(
@@ -106,29 +125,70 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
     }
 
-    /*
-    private val tuLogo = Button(
-        width = 540, height =  138, posX = 670, posY = 850,
-        visual = ImageVisual("TULogo.png")
-        ).apply {
-        if(!this.isDisabled) {
-            onMouseEntered = {
-                this.visual = ImageVisual("TULogoHover.png")
-            }
-            onMouseExited = {
-                this.visual = ImageVisual("TULogo.png")
-            }
-            onMouseClicked = {
-                app.showDialog(Dialog(
-                    dialogType = DialogType.INFORMATION,
-                    title = "TU Dortmund",
-                    header = "Technische Universität Dortmund",
-                    message = "https://www.tu-dortmund.de/"
-                ))
-            }
+    /**
+     * Input field for player 1's name. Permanently enabled.
+     */
+    private val p1Input = TextField(
+        width = 428, height = 90, posX = 795, posY = 367 - 45,
+        text = namesList.random(),
+        font = globalFont,
+        prompt = "Enter name",
+    ).apply {
+        this.componentStyle = style
+        onKeyTyped = {
+            countPlayers()
         }
     }
-    */
+
+    /**
+     * Input field for player 2's name. Permanently enabled.
+     */
+    private val p2Input = TextField(
+        width = 428, height = 90, posX = 795, posY = 476 - 45,
+        text = namesList.random(),
+        font = globalFont,
+        prompt = "Enter name",
+    ).apply {
+        this.componentStyle = style
+        onKeyTyped = {
+            countPlayers()
+        }
+    }
+
+    /**
+     * Input field for player 1's name. Enabled upon clicking [addButton3],
+     * and disabled upon clicking [removeButton3].
+     */
+    private val p3Input = TextField(
+        width = 428, height = 90, posX = 795, posY = 587 - 45,
+        text = "Add player 3",
+        font = globalFont,
+        prompt = "Enter name"
+    ).apply {
+        this.componentStyle = style
+        this.isDisabled = true
+        this.visual = Visual.EMPTY
+        onKeyTyped = {
+            countPlayers()
+        }
+    }
+
+    /**
+     * Input field for player 1's name. Enabled upon clicking [addButton4],
+     * and disabled upon clicking [removeButton4].
+     */
+    private val p4Input = TextField(
+        width = 428, height = 90, posX = 795, posY = 697 - 45,
+        text = "Add player 4",
+        font = globalFont,
+        prompt = "Enter name",
+    ).apply {
+        this.componentStyle = style
+        this.isDisabled = true
+        onKeyTyped = {
+            countPlayers()
+        }
+    }
 
     /**
      * Schwimmen title in the middle top of the screen.
@@ -143,7 +203,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Player 1 label on the left. Permanently visible.
      */
     private val p1Label = Label(
-        width = 158, height = 65, posX = 578, posY = 347,
+        width = 158, height = 65, posX = 578, posY = p1Input.posY + 20,
         text  = "",
         visual = ImageVisual("Player1.png")
     )
@@ -152,7 +212,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Player 2 label on the left. Permanently visible.
      */
     private val p2Label = Label(
-        width = 158, height = 65, posX = 578, posY = 451,
+        width = 158, height = 65, posX = 578, posY = p2Input.posY + 20,
         text  = "",
         visual = ImageVisual("Player2.png")
     )
@@ -162,7 +222,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * and disappears upon clicking [removeButton3].
      */
     private val p3Label = Label(
-        width = 158, height = 65, posX = 578, posY = 555,
+        width = 158, height = 65, posX = 578, posY = p3Input.posY + 20,
         text  = "",
         visual = Visual.EMPTY
     ).apply {
@@ -174,7 +234,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * and disappears upon clicking [removeButton4].
      */
     private val p4Label = Label(
-        width = 158, height = 65, posX = 578, posY = 659,
+        width = 158, height = 65, posX = 578, posY = p4Input.posY + 20,
         text  = "",
         visual = Visual.EMPTY
     ).apply {
@@ -185,7 +245,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Adds [p3Label] and [removeButton3] and activates [p3Input] and [addButton4]. Also removes iteslf.
      */
     private val addButton3 = Button(
-        width = 90, height =  90, posX = 620, posY = 550,
+        width = 90, height =  90, posX = 620, posY = p3Input.posY + 2,
         visual = ImageVisual("AddButton.png")
     ).apply {
         onMouseEntered = {
@@ -215,7 +275,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Adds [p4Label] and [removeButton4], activates [p4Input], and removes itself with [removeButton3].
      */
     private val addButton4 = Button(
-        width = 90, height =  90, posX = 620, posY = 650,
+        width = 90, height =  90, posX = 620, posY = p4Input.posY + 2,
         visual = ImageVisual("AddButtonDisabled.png")
     ).apply {
         this.isDisabled = true
@@ -246,7 +306,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Removes [p3Label] and itself, deactivates [p3Input] and adds [addButton3].
      */
     private val removeButton3: Button = Button(
-        width = 90, height =  90, posX = 1300, posY = 550,
+        width = 90, height =  90, posX = 1300, posY = addButton3.posY + 2,
         visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
@@ -277,7 +337,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Removes [p4Label] and itself, deactivates [p4Input] and adds [removeButton3], [addButton3].
      */
     private val removeButton4: Button = Button(
-        width = 90, height =  90, posX = 1300, posY = 650,
+        width = 90, height =  90, posX = 1300, posY = addButton4.posY + 2,
         visual = Visual.EMPTY
     ).apply {
         this.isDisabled = true
@@ -301,66 +361,6 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 this.isDisabled = true
                 countPlayers()
             }
-        }
-    }
-
-    /**
-     * Input field for player 1's name. Permanently enabled.
-     */
-    private val p1Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 367 - 45,
-        text = namesList.random(),
-        font = globalFont,
-        prompt = "Enter name",
-    ).apply {
-        onKeyTyped = {
-            countPlayers()
-        }
-    }
-
-    /**
-     * Input field for player 2's name. Permanently enabled.
-     */
-    private val p2Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 476 - 45,
-        text = namesList.random(),
-        font = globalFont,
-        prompt = "Enter name",
-    ).apply {
-        onKeyTyped = {
-            countPlayers()
-        }
-    }
-
-    /**
-     * Input field for player 1's name. Enabled upon clicking [addButton3],
-     * and disabled upon clicking [removeButton3].
-     */
-    private val p3Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 587 - 45,
-        text = "Add player 3",
-        font = globalFont,
-        prompt = "Enter name",
-    ).apply {
-        this.isDisabled = true
-        onKeyTyped = {
-            countPlayers()
-        }
-    }
-
-    /**
-     * Input field for player 1's name. Enabled upon clicking [addButton4],
-     * and disabled upon clicking [removeButton4].
-     */
-    private val p4Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 697 - 45,
-        text = "Add player 4",
-        font = globalFont,
-        prompt = "Enter name",
-    ).apply {
-        this.isDisabled = true
-        onKeyTyped = {
-            countPlayers()
         }
     }
 
@@ -399,6 +399,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                     players.add(SchwimmenPlayer(p4Input.text.trim()))
                 }
                 println("$players")
+                rootService.gameService.startGame(players)
             }
         }
     }
@@ -444,8 +445,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * This function serves as a security layer to prevent starting the game with
      * less than 2 players. It is called upon any change in the input value in each of
      * [p1Input], [p2Input], [p3Input] and [p4Input] as well as upon clicking any of
-     * [addButton3], [addButton4], [removeButton3] and [removeButton4].
-     * It can enable / disable the "Start" button depending on how many valid player names in total are entered.
+     * [addButton3], [addButton4], [removeButton3] and [removeButton4]. It can both
+     * enable and disable the "Start" button depending on how many valid player names
+     * in total are entered.
      * @return the number of entered player names (spaces don't count).
      */
     private fun countPlayers(): Int {
