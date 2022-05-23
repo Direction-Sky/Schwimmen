@@ -2,12 +2,13 @@ package service
 
 import entity.CardSuit
 import entity.CardValue
+import entity.SchwimmenCard
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 
-private const val CARDS_FILE = "/card_deck.png"
-private const val IMG_HEIGHT = 200
-private const val IMG_WIDTH = 130
+private const val CARDS_FILE = "/images/Deck32WithBack.png"
+private const val IMG_HEIGHT = 375
+private const val IMG_WIDTH = 300
 
 /**
  * Provides access to the src/main/resources/card_deck.png file that contains all card images
@@ -31,14 +32,20 @@ class CardImageLoader {
         getImageByCoordinates(value.column, suit.row)
 
     /**
+     * Provides the card image for the given [SchwimmenCard].
+     */
+    fun frontImageForCard(card: SchwimmenCard) =
+        getImageByCoordinates(card.value.column, card.suit.row)
+
+    /**
      * Provides a blank (white) card
      */
-    val blankImage : BufferedImage get() = getImageByCoordinates(0, 4)
+    val blankImage : BufferedImage get() = getImageByCoordinates(1, 4)
 
     /**
      * Provides the back side image of the card deck
      */
-    val backImage: BufferedImage get() = getImageByCoordinates(2, 4)
+    val backImage: BufferedImage get() = getImageByCoordinates(0, 4)
 
     /**
      * retrieves from the full raster image [image] the corresponding sub-image
@@ -48,7 +55,7 @@ class CardImageLoader {
      * @param y row in the raster image, starting at 0
      *
      */
-    private fun getImageByCoordinates (x: Int, y: Int) : BufferedImage =
+    fun getImageByCoordinates (x: Int, y: Int) : BufferedImage =
         image.getSubimage(
             x * IMG_WIDTH,
             y * IMG_HEIGHT,
@@ -79,16 +86,12 @@ private val CardSuit.row get() = when (this) {
  */
 private val CardValue.column get() = when (this) {
     CardValue.ACE -> 0
-    CardValue.TWO -> 1
-    CardValue.THREE -> 2
-    CardValue.FOUR -> 3
-    CardValue.FIVE -> 4
-    CardValue.SIX -> 5
-    CardValue.SEVEN -> 6
-    CardValue.EIGHT -> 7
-    CardValue.NINE -> 8
-    CardValue.TEN -> 9
-    CardValue.JACK -> 10
-    CardValue.QUEEN -> 11
-    CardValue.KING -> 12
+    CardValue.SEVEN -> 1
+    CardValue.EIGHT -> 2
+    CardValue.NINE -> 3
+    CardValue.TEN -> 4
+    CardValue.JACK -> 5
+    CardValue.QUEEN -> 6
+    CardValue.KING -> 7
+     else -> 0
 }

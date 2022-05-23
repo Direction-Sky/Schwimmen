@@ -7,8 +7,6 @@ import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.MenuScene
-import tools.aqua.bgw.dialog.ButtonType
-import tools.aqua.bgw.animation.Animation
 import tools.aqua.bgw.core.BoardGameApplication
 import tools.aqua.bgw.dialog.Dialog
 import tools.aqua.bgw.dialog.DialogType
@@ -18,7 +16,6 @@ import tools.aqua.bgw.visual.CompoundVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 import java.awt.Color
-import java.net.URL
 
 /**
  * This is the main menu screen. Players list sizing 2 - 4 players will be constructed and
@@ -33,7 +30,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * Global font.
      */
     val globalFont: Font = Font(
-        size = 36, color = Color.WHITE,
+        size = 36, color = Color(239,239,239,255),
         family = "Comic Sans MS",
         fontWeight = Font.FontWeight.SEMI_BOLD,
     )
@@ -44,7 +41,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      */
     private val style: String = (
         "-fx-background-color: rgba(0, 0, 0, 0.0);" +
-        "-fx-background-image: url('TextInputField.png');" +
+        "-fx-background-image: url('images/TextInputField.png');" +
         "-fx-background-size: cover;" +
         // "-fx-src: url('/font/Boogaloo-Regular.ttf');" +
         //"-fx-font-family: 'Boogaloo'" +
@@ -64,17 +61,17 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      */
     private val tuButton = Label(
         width = 192, height =  192, posX = 108, posY = 70,
-        visual = ImageVisual("TUButton.png")
+        visual = ImageVisual("images/TUButton2.png")
     ).apply {
         if(!this.isDisabled) {
             onMouseEntered = {
-                this.visual = ImageVisual("TUButtonHover.png")
+                this.visual = ImageVisual("images/TUButtonHover2.png")
             }
             onMouseExited = {
-                this.visual = ImageVisual("TUButton.png")
+                this.visual = ImageVisual("images/TUButton2.png")
             }
             onMousePressed = {
-                this.visual = ImageVisual("TUButtonPressed.png")
+                this.visual = ImageVisual("images/TUButtonPressed2.png")
             }
             onMouseClicked = {
                 app.showDialog(Dialog(
@@ -92,17 +89,17 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      */
     private val helpButton = Label(
         width = 192, height =  192, posX = 1620, posY = 70,
-        visual = ImageVisual("HelpButton.png")
+        visual = ImageVisual("images/HelpButton.png")
     ).apply {
         if(!this.isDisabled) {
             onMouseEntered = {
-                this.visual = ImageVisual("HelpButtonHover.png")
+                this.visual = ImageVisual("images/HelpButtonHover.png")
             }
             onMouseExited = {
-                this.visual = ImageVisual("HelpButton.png")
+                this.visual = ImageVisual("images/HelpButton.png")
             }
             onMousePressed = {
-                this.visual = ImageVisual("HelpButtonPressed.png")
+                this.visual = ImageVisual("images/HelpButtonPressed.png")
             }
             onMouseClicked = {
                 app.showDialog(Dialog(
@@ -196,7 +193,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val headlineLabel = Label(
         width = 876, height = 152, posX = 522, posY = 85,
         text = "",
-        visual = ImageVisual("Schwimmen.png")
+        visual = ImageVisual("images/Schwimmen.png")
     )
 
     /**
@@ -205,7 +202,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p1Label = Label(
         width = 158, height = 65, posX = 578, posY = p1Input.posY + 20,
         text  = "",
-        visual = ImageVisual("Player1.png")
+        visual = ImageVisual("images/Player1.png")
     )
 
     /**
@@ -214,7 +211,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val p2Label = Label(
         width = 158, height = 65, posX = 578, posY = p2Input.posY + 20,
         text  = "",
-        visual = ImageVisual("Player2.png")
+        visual = ImageVisual("images/Player2.png")
     )
 
     /**
@@ -246,24 +243,24 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      */
     private val addButton3 = Button(
         width = 90, height =  90, posX = 620, posY = p3Input.posY + 2,
-        visual = ImageVisual("AddButton.png")
+        visual = ImageVisual("images/AddButton.png")
     ).apply {
         onMouseEntered = {
-            if(!this.isDisabled) this.visual = ImageVisual("AddButtonHover.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/AddButtonHover.png")
         }
         onMouseExited = {
-            if(!this.isDisabled) this.visual = ImageVisual("AddButton.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/AddButton.png")
         }
         onMouseClicked = {
             if(!this.isDisabled) {
-                addButton4.visual = ImageVisual("AddButton.png")
+                addButton4.visual = ImageVisual("images/AddButton.png")
                 addButton4.isDisabled = false
                 p3Label.isDisabled = false
-                p3Label.visual = ImageVisual("Player3.png")
+                p3Label.visual = ImageVisual("images/Player3.png")
                 p3Input.isDisabled = false
                 p3Input.text = namesList.random()
                 removeButton3.isDisabled = false
-                removeButton3.visual = ImageVisual("RemoveButton.png")
+                removeButton3.visual = ImageVisual("images/RemoveButton.png")
                 this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
@@ -276,25 +273,25 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      */
     private val addButton4 = Button(
         width = 90, height =  90, posX = 620, posY = p4Input.posY + 2,
-        visual = ImageVisual("AddButtonDisabled.png")
+        visual = ImageVisual("images/AddButtonDisabled.png")
     ).apply {
         this.isDisabled = true
         onMouseEntered = {
-            if(!this.isDisabled) this.visual = ImageVisual("AddButtonHover.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/AddButtonHover.png")
         }
         onMouseExited = {
-            if(!this.isDisabled) this.visual = ImageVisual("AddButton.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/AddButton.png")
         }
         onMouseClicked = {
             if(!this.isDisabled) {
                 p4Label.isDisabled = false
-                p4Label.visual = ImageVisual("Player4.png")
+                p4Label.visual = ImageVisual("images/Player4.png")
                 p4Input.isDisabled = false
                 p4Input.text = namesList.random()
                 removeButton3.isDisabled = true
                 removeButton3.visual = Visual.EMPTY
                 removeButton4.isDisabled = false
-                removeButton4.visual = ImageVisual("RemoveButton.png")
+                removeButton4.visual = ImageVisual("images/RemoveButton.png")
                 this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
@@ -311,10 +308,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     ).apply {
         this.isDisabled = true
         onMouseEntered = {
-            if(!this.isDisabled) this.visual = ImageVisual("RemoveButtonHover2.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/RemoveButtonHover2.png")
         }
         onMouseExited = {
-            if(!this.isDisabled) this.visual = ImageVisual("RemoveButton.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/RemoveButton.png")
         }
         onMouseClicked = {
             if(!this.isDisabled) {
@@ -322,10 +319,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p3Input.text = "Add player 3"
                 p3Input.isDisabled = true
                 addButton3.isDisabled = false
-                addButton3.visual = ImageVisual("AddButton.png")
+                addButton3.visual = ImageVisual("images/AddButton.png")
                 p3Label.isDisabled = true
                 p3Label.visual = Visual.EMPTY
-                addButton4.visual = ImageVisual("AddButtonDisabled.png")
+                addButton4.visual = ImageVisual("images/AddButtonDisabled.png")
                 addButton4.isDisabled = true
                 this.isDisabled = true
                 countPlayers()
@@ -342,10 +339,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     ).apply {
         this.isDisabled = true
         onMouseEntered = {
-            if(!this.isDisabled) this.visual = ImageVisual("RemoveButtonHover2.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/RemoveButtonHover2.png")
         }
         onMouseExited = {
-            if(!this.isDisabled) this.visual = ImageVisual("RemoveButton.png")
+            if(!this.isDisabled) this.visual = ImageVisual("images/RemoveButton.png")
         }
         onMouseClicked = {
             if(!this.isDisabled) {
@@ -354,9 +351,9 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 p4Label.isDisabled = true
                 p4Label.visual = Visual.EMPTY
                 addButton4.isDisabled = false
-                addButton4.visual = ImageVisual("AddButton.png")
+                addButton4.visual = ImageVisual("images/AddButton.png")
                 removeButton3.isDisabled = false
-                removeButton3.visual = ImageVisual("RemoveButton.png")
+                removeButton3.visual = ImageVisual("images/RemoveButton.png")
                 this.visual = Visual.EMPTY
                 this.isDisabled = true
                 countPlayers()
@@ -371,17 +368,17 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     private val startButton = Button(
         width = 222, height =  107, posX = 1624, posY = 871,
         alignment = Alignment.CENTER,
-        visual = ImageVisual("StartButton.png")
+        visual = ImageVisual("images/StartButton.png")
     ).apply {
         if(!this.isDisabled) {
             onMouseEntered = {
                 if(countPlayers() >= 2) {
-                    this.visual = ImageVisual("StartButtonHover.png")
+                    this.visual = ImageVisual("images/StartButtonHover.png")
                 }
             }
             onMouseExited = {
                 if(countPlayers() >= 2) {
-                    this.visual = ImageVisual("StartButton.png")
+                    this.visual = ImageVisual("images/StartButton.png")
                 }
             }
             onMouseClicked = {
@@ -410,25 +407,25 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     val exitButton = Button(
         width = 222, height =  107, posX = 75, posY = 871,
         alignment = Alignment.CENTER,
-        visual = ImageVisual("ExitButton.png"),
+        visual = ImageVisual("images/ExitButton.png"),
 
     ).apply {
         if(!this.isDisabled) {
             onMouseEntered = {
-                this.visual = ImageVisual("ExitButtonHover2.png")
+                this.visual = ImageVisual("images/ExitButtonHover2.png")
             }
             onMouseExited = {
-                this.visual = ImageVisual("ExitButton.png")
+                this.visual = ImageVisual("images/ExitButton.png")
             }
         }
     }
 
     init {
         background = CompoundVisual(
-            ImageVisual("Background.jpg"),
-            ColorVisual(70,40,120,100)
+            ImageVisual("images/Background.jpg"),
+            ColorVisual(70,40,120,50)
         )
-        opacity = .3
+        opacity = .5
         addComponents(
             helpButton, tuButton,
             headlineLabel,
@@ -466,11 +463,11 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         }
         if(n >= 2) {
             startButton.isDisabled = false
-            startButton.visual = ImageVisual("StartButton.png")
+            startButton.visual = ImageVisual("images/StartButton.png")
         }
         if(n < 2) {
             startButton.isDisabled = true
-            startButton.visual = ImageVisual("StartButtonDisabled.png")
+            startButton.visual = ImageVisual("images/StartButtonDisabled.png")
         }
         return n
     }

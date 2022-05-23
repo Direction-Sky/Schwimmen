@@ -7,7 +7,11 @@ import tools.aqua.bgw.visual.ImageVisual
 class SchwimmenApplication: BoardGameApplication("♦ Schwimmen ♦"), Refreshable {
     private val rootService = RootService()
 
-    private val gameScene = SchwimmenGameScene(rootService)
+    private val gameScene = SchwimmenGameScene(this, rootService).apply {
+        this.exitButton.onMouseClicked = {
+            exit()
+        }
+    }
 
     private val newGameMenuScene = NewGameMenuScene(this, rootService).apply {
         this.exitButton.onMouseClicked = {
@@ -16,7 +20,7 @@ class SchwimmenApplication: BoardGameApplication("♦ Schwimmen ♦"), Refreshab
     }
 
     init {
-        this.icon = ImageVisual("SchwimmenIcon2.png")
+        this.icon = ImageVisual("images/SchwimmenIcon2.png")
         // all scenes and the application itself need too
         // react to changes done in the service layer
         rootService.addRefreshables(
@@ -30,13 +34,14 @@ class SchwimmenApplication: BoardGameApplication("♦ Schwimmen ♦"), Refreshab
         // the new game menu has content and looks nicer
         //rootService.gameService.startGame("Bob", "Alice")
 
-        this.showGameScene(gameScene)
+        //
         this.showMenuScene(newGameMenuScene, 500)
 
     }
 
     override fun refreshAfterStartNewGame() {
-        this.hideMenuScene(500)
+        this.showGameScene(gameScene)
+        this.hideMenuScene(700)
     }
 
     override fun refreshAfterGameEnd() {
