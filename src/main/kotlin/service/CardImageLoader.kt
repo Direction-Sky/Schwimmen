@@ -3,6 +3,7 @@ package service
 import entity.CardSuit
 import entity.CardValue
 import entity.SchwimmenCard
+import java.awt.Image
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 
@@ -33,6 +34,7 @@ class CardImageLoader {
 
     /**
      * Provides the card image for the given [SchwimmenCard].
+     * @author Ahmad Jammal.
      */
     fun frontImageForCard(card: SchwimmenCard) =
         getImageByCoordinates(card.value.column, card.suit.row)
@@ -46,6 +48,35 @@ class CardImageLoader {
      * Provides the back side image of the card deck
      */
     val backImage: BufferedImage get() = getImageByCoordinates(0, 4)
+
+    /**
+     * @author Steven Spungin https://stackoverflow.com/a/47511279
+     * Edited.
+     */
+    private fun toBufferedImage(image: Image): BufferedImage {
+        if (image is BufferedImage) {
+            return image
+        }
+        val bufferedImage = BufferedImage(
+            image.getWidth(null),
+            image.getHeight(null),
+            BufferedImage.TYPE_INT_ARGB
+        )
+
+        val graphics2D = bufferedImage.createGraphics()
+        graphics2D.drawImage(image, 0, 0, null)
+        graphics2D.dispose()
+
+        return bufferedImage
+    }
+
+    /**
+     * This is required for playing animation, since the animation takes the original size.
+     * @author Ahmad Jammal.
+     */
+    fun resizedBufferedImage(pic: BufferedImage, width: Int, height: Int): BufferedImage {
+        return toBufferedImage(pic.getScaledInstance(width, height, 1))
+    }
 
     /**
      * retrieves from the full raster image [image] the corresponding sub-image
