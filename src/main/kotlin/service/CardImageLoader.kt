@@ -46,6 +46,7 @@ class CardImageLoader {
 
     /**
      * Provides the back side image of the card deck
+     * @author CONG. https://pngtree.com/freepng/cartoon-blue-playing-card-pattern_5568784.html
      */
     val backImage: BufferedImage get() = getImageByCoordinates(0, 4)
 
