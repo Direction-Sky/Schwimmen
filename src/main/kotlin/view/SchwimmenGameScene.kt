@@ -2,6 +2,8 @@ package view
 
 import entity.SchwimmenCard
 import entity.SchwimmenPlayer
+import entity.SchwimmenGame
+import service.AbstractRefreshingService
 import service.CardImageLoader
 import service.RootService
 import tools.aqua.bgw.animation.*
@@ -20,11 +22,20 @@ import java.awt.Color
  * @author Ahmad Jammal.
  * @property cardImageLoader is used to load buffer image.
  * @property viewEffect provides visual effects on mouse actions as well as show / hide features.
- * @property handView is tuple of type ([Label], [SchwimmenCard]), where the card belongs to the current [SchwimmenPlayer].
- * @property handView is tuple of type ([Label], [SchwimmenCard]), where the card belongs to the table.
- * @property namesView is a tuple of type ([Label], [SchwimmenPlayer])
+ * @property handView is a tuple set of type ([Label], [SchwimmenCard]), where the card belongs to the current [SchwimmenPlayer].
+ * @property tableView is a tuple set of type ([Label], [SchwimmenCard]), where the card belongs to the table.
+ * @property namesView is a tuple set of type ([Label], [SchwimmenPlayer]). This holds every player
+ * connected with their displayed names.
+ * @property checkView is a tuple set of type([Label], [SchwimmenPlayer]). This holds every player
+ * connected with their status, whether it's a pass, or play-after-knock.
+ * @property knocked indicates whether someone has already knocked, meaning it's the last round.
+ * @property afterKnock is the number of players who've had a turn after knock. Starting from the
+ * player who knocked first with the value of 1. This is controlled by [refreshCheckView].
+ * @property currentPlayer is the index of the player currently playing.
  * @property hidden is set to true if hand cards are hidden.
  * @property globalFont is the standard font used in this UI.
+ * @property handSelection is the list of selected cards from hand. This is necessary for [actionChangeOne].
+ * @property tableSelection is the list of selected cards from table. This is necessary for [actionChangeOne].
  */
 class SchwimmenGameScene(
     val app: SchwimmenApplication,
@@ -32,17 +43,29 @@ class SchwimmenGameScene(
 
     private val cardImageLoader = CardImageLoader()
     private val viewEffect = CardViewEffect()
-    private var condition = false
+    /* This serves the purpose of initializing the board */
+    private var initialized = false
 
     private val handView: BidirectionalMap<Label, SchwimmenCard> = BidirectionalMap()
     private val tableView: BidirectionalMap<Label, SchwimmenCard> = BidirectionalMap()
     private val namesView: BidirectionalMap<Label, SchwimmenPlayer> = BidirectionalMap()
     private val checkView: BidirectionalMap<Label, SchwimmenPlayer> = BidirectionalMap()
 
+    private var knocked: Boolean = false
+    private var afterKnock: Int = 0
     private var currentPlayer: Int = 0
     private var hidden: Boolean = false
+
     private val handSelection: MutableList<SchwimmenCard> = mutableListOf()
     private val tableSelection: MutableList<SchwimmenCard> = mutableListOf()
+
+    /**
+     * @author sang.
+     * https://pngtree.com/freepng/rotate-left-circular-arrow-blue_6421127.html
+     */
+    private val passImage = "images/Pass.png"
+
+    private val checkImage = "images/Check.png"
 
     private val globalFont: Font = Font(
         size = 46, color = Color.WHITE,
@@ -55,7 +78,7 @@ class SchwimmenGameScene(
         fontWeight = Font.FontWeight.SEMI_BOLD,
     )
 
-    private val testCard = Label(
+    private val testCard: Label = Label(
         10, 10, 130, 200,
         visual = ImageVisual(cardImageLoader.getImageByCoordinates(4,2))
     ).apply {
@@ -71,7 +94,10 @@ class SchwimmenGameScene(
                 )
             ))
             */
-            drawThreeCards()
+            println(this.visual.toString())
+            println(this.name)
+            println(::testCard.name)
+            //drawThreeCards()
         }
     }
 
@@ -98,6 +124,11 @@ class SchwimmenGameScene(
             if (!this.isDisabled) {
                 this.visual = ImageVisual("images/ActionNextDisabled.png")
                 this.isDisabled = true
+                /* Next player's turn */
+                refreshActionButtons(this, false)
+                rootService.playerActionService.onAllRefreshables {
+                    refreshAfterTurn()
+                }
             }
         }
     }
@@ -172,14 +203,14 @@ class SchwimmenGameScene(
         }
         onMouseClicked = {
             if (!this.isDisabled) {
-                if (!condition) {
+                if (!initialized) {
                     initializeBoard()
-                    condition = true
+                    initialized = true
                 }
                 //refreshView(rootService.currentGame?.players[0].handCards, rootService.currentGame!!.players[0].handCards, handView)
                 //refreshView(rootService.currentGame!!.tableCards, rootService.currentGame!!.tableCards, tableView)
                 refreshDeckCount()
-                refreshHandScore(rootService.currentGame!!.players[currentPlayer])
+                refreshHandScore()
                 this.isDisabled = true
                 removeComponents(this)
             }
@@ -255,7 +286,22 @@ class SchwimmenGameScene(
         }
         onMouseClicked = {
             if (!this.isDisabled) {
-
+                val list: MutableList<SchwimmenCard>? = rootService.playerActionService.pass(
+                    rootService.currentGame!!.players[currentPlayer]
+                )
+                /* If list was created, it means a full round has been passed */
+                if(list != null) {
+                    /* If the list is empty, this means deck had insufficient cards */
+                    if(list.size == 0) {
+                        // End the game
+                        rootService.currentGame!!.gameLoop = false
+                    }
+                    else {
+                        drawThreeCards(list)
+                    }
+                }
+                refreshActionButtons(this, true)
+                refreshCheckView()
             }
         }
 
@@ -282,7 +328,7 @@ class SchwimmenGameScene(
             if(this.isSelected) {
                 showHideText.text = "Hide"
                 hidden = false
-                refreshHandScore(rootService.currentGame!!.players[currentPlayer])
+                refreshHandScore()
                 /* Play flip animation and refresh after it finishes */
                 rootService.currentGame!!.players[currentPlayer].handCards.forEach {
                     this@SchwimmenGameScene.playAnimation(
@@ -314,7 +360,7 @@ class SchwimmenGameScene(
             else {
                 showHideText.text = "Show"
                 hidden = true
-                refreshHandScore(rootService.currentGame!!.players[currentPlayer])
+                refreshHandScore()
                 /* Play flip animation and refresh after it finishes */
                 rootService.currentGame!!.players[currentPlayer].handCards.forEach {
                     this@SchwimmenGameScene.playAnimation(
@@ -364,28 +410,70 @@ class SchwimmenGameScene(
     /**
      * @return the index of the next player in the circle, cycling between 0 and player count.
      */
-    private fun refreshCurrentPlayer(index: Int): Int {
-        return if(index < rootService.currentGame!!.players.size - 1) {
-            index + 1
+    private fun getNextPlayerIndex(): Int {
+        return if(currentPlayer < rootService.currentGame!!.players.size - 1) {
+            currentPlayer + 1
         } else {
             0
         }
     }
 
     /**
-     *
-     * @param buttons are the four action buttons.
-     * @param disable set to true if [buttons] need to be disabled.
+     * Updates the value of [currentPlayer] to the next index.
      */
-    private fun refreshActionButtons(buttons: List<Button>, clicked: Button, disable: Boolean) {
-        if (clicked == actionChangeOne) {
-            clicked.isDisabled = false
-            clicked.visual = ImageVisual("ActionNext.png")
+    private fun refreshCurrentPlayerIndex() {
+        currentPlayer = getNextPlayerIndex()
+    }
+
+    /**
+     * Inherited from [Refreshable]. Prepares for the next player's turn.
+     */
+    override fun refreshAfterTurn() {
+        showHideToggle.isSelected = false
+        refreshView(
+            oldSet = rootService.currentGame!!.players[currentPlayer].handCards,
+            newSet = rootService.currentGame!!.players[getNextPlayerIndex()].handCards,
+            view = handView
+        )
+        refreshCurrentPlayerIndex()
+        refreshPlayerNames()
+        refreshHandScore()
+    }
+
+    /**
+     * Enables / disables action buttons after an action had been clicked.
+     * @param disable set to true if desired action is to disable  the buttons.
+     */
+    private fun refreshActionButtons(clicked: Button, disable: Boolean) {
+        if(disable) {
+            /* Disable action buttons -> enable next and vice versa */
+            actionChangeOne.isDisabled = true
+            actionChangeOne.visual = ImageVisual("images/ActionChangeOneDisabled.png")
+            actionChangeAll.isDisabled = true
+            actionChangeAll.visual = ImageVisual("images/ActionChangeAllDisabled.png")
+            actionKnock.isDisabled = true
+            actionKnock.visual = ImageVisual("images/ActionKnockDisabled.png")
+            actionPass.isDisabled = true
+            actionPass.visual = ImageVisual("images/ActionPassDisabled.png")
+            /* In all cases except for this one a player had to click Next clicking an action button */
+            if(clicked != actionChangeOne) {
+                nextButton.isDisabled = false
+                nextButton.visual = ImageVisual("images/ActionNext.png")
+            }
         }
-        buttons.forEach {
-            it.isDisabled = true
-            it.visual = ImageVisual("${it.visual.toString().removeSuffix(".png")}Disabled.png")
+        else {
+            actionChangeOne.isDisabled = false
+            actionChangeOne.visual = ImageVisual("images/ActionChangeOne.png")
+            actionChangeAll.isDisabled = false
+            actionChangeAll.visual = ImageVisual("images/ActionChangeAll.png")
+            actionKnock.isDisabled = false
+            actionKnock.visual = ImageVisual("images/ActionKnock.png")
+            actionPass.isDisabled = false
+            actionPass.visual = ImageVisual("images/ActionPass.png")
+            nextButton.isDisabled = true
+            nextButton.visual = ImageVisual("images/ActionNextDisabled.png")
         }
+
     }
 
     /**
@@ -494,7 +582,7 @@ class SchwimmenGameScene(
 
     /**
      * Refreshes player names on the right. Please note that [currentPlayer] is
-     * to be refreshed using [refreshCurrentPlayer] before applying this function.
+     * to be refreshed using [getNextPlayerIndex] before applying this function.
      */
     private fun refreshPlayerNames() {
         for (player in rootService.currentGame!!.players) {
@@ -516,15 +604,52 @@ class SchwimmenGameScene(
     }
 
     /**
-     * Updates the score of a player's hand. Shown on the left. If hidden, "??" will be shown
-     * instead of the number.
-     * @param player is the player who is holding the cards.
+     * Refreshes the check image on the left of player names. This fun is to be called after turn
+     * is finished, and before clicking [nextButton]. It increments [afterKnock] and can end the
+     * game if a full round had been made after someone had knocked.
      */
-    private fun refreshHandScore(player: SchwimmenPlayer) {
+    private fun refreshCheckView() {
+        /* Knock section */
+        if(rootService.playerActionService.afterKnock > 0) {
+            checkView.backward(
+                rootService.currentGame!!.players[currentPlayer]
+            ).visual = ImageVisual(checkImage)
+            /* afterKnock will be incremented from playerActionService */
+            if (rootService.playerActionService.afterKnock >= rootService.currentGame!!.players.size) {
+                /* finish game */
+            }
+        }
+        /* Pass section */
+        else {
+            if(rootService.currentGame!!.passCounter == 0) {
+                /* This means either a full round or no round had been made with pass */
+                rootService.currentGame!!.players.forEach { player ->
+                    checkView.backward(player).visual = Visual.EMPTY
+                }
+            }
+            else {
+                checkView.backward(
+                    rootService.currentGame!!.players[currentPlayer]
+                ).visual = ImageVisual(passImage)
+                /* Play beautiful spinning arrow animations */
+                playAnimation(RotationAnimation(
+                    checkView.backward(rootService.currentGame!!.players[currentPlayer]),
+                    -270.0,
+                    500
+                ))
+            }
+        }
+    }
+
+    /**
+     * Updates the score of the current player's hand. Shown on the left.
+     * If hidden, "??" will be shown instead of the number.
+     */
+    private fun refreshHandScore() {
         this@SchwimmenGameScene.playAnimation(SequentialAnimation(
             MovementAnimation(handScore, 0, -3,200).apply {
                 onFinished = {
-                    val score = player.checkHandScore()
+                    val score = rootService.currentGame!!.players[currentPlayer].checkHandScore()
                     if(score != 30.5) {
                         handScore.text = "${score.toInt()}"
                     }
@@ -542,88 +667,80 @@ class SchwimmenGameScene(
 
     /**
      * Shows beautiful animations of drawing 3 cards to the table.
-     * Updates the list of table cards and refreshes [tableView].
-     * Game will be ended if deck has insufficient cards.
+     * Updates the list of table cards and refreshes [tableView],
+     * and adds the drawn cards to [SchwimmenGame.tableCards].
      */
-    private fun drawThreeCards() {
-        rootService.currentGame!!.deck.drawThreeCards().let { newCards ->
-            if(newCards == null) {
-                /* Game ends on the spot */
-                println("Game over")
-            }
-            else {
-                /* Create card images on top of the deck for animations */
-                newCards.forEach { card ->
-                    addComponents(Label(
-                        width = 190, height = 250, posY = 300, posX = 200,
-                    ).apply {
-                        this.isDisabled = true
-                        var effect = CompoundVisual(ImageVisual(cardImageLoader.frontImageForCard(card)))
-                        effect = viewEffect.hide(effect)
-                        this.visual = effect
-                        tableView.add(this, card)
-                    })
-                }
-                /* Play beautiful animations on each of the three drawn cards
-                * and make sure that each one is facing front upon landing */
-                this@SchwimmenGameScene.playAnimation(SequentialAnimation(
-                    ParallelAnimation(
-                        RotationAnimation(tableView.backward(newCards[0]), 360.0, 400),
-                        MovementAnimation(tableView.backward(newCards[0]), 430, -150, 400),
-                        FlipAnimation(tableView.backward(newCards[0]),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[0]), 190, 250)),
-                            400
-                        )
-                    ).apply {
-                        onFinished = {
-                            tableView.backward(newCards[0]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[0]))
-                        }
-                    },
-                    ParallelAnimation(
-                        RotationAnimation(tableView.backward(newCards[1]), 360.0, 400),
-                        MovementAnimation(tableView.backward(newCards[1]), 650, -150, 400),
-                        FlipAnimation(tableView.backward(newCards[1]),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[1]), 190, 250)),
-                            300
-                        )
-                    ).apply {
-                        onFinished = {
-                            tableView.backward(newCards[1]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[1]))
-                        }
-                    },
-                    ParallelAnimation(
-                        RotationAnimation(tableView.backward(newCards[2]), 360.0, 400),
-                        MovementAnimation(tableView.backward(newCards[2]), 870, -150, 400),
-                        FlipAnimation(tableView.backward(newCards[2]),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
-                            ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[2]), 190, 250)),
-                            200
-                        )
-                    ).apply {
-                        onFinished = {
-                            tableView.backward(newCards[2]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[2]))
-                        }
-                    }
-                ).apply {
-                    onFinished = {
-                        refreshDeckCount()
-                        /* Since those labels are created for the sole purpose of animation,
-                        * they have to be deleted, and recreated using [refreshView] */
-                        newCards.forEach { card ->
-                            removeComponents(tableView.backward(card))
-                            tableView.remove(tableView.backward(card), card)
-                        }
-                        refreshView(oldSet = rootService.currentGame!!.tableCards, newSet = newCards, view = tableView)
-                        rootService.currentGame!!.tableCards.clear()
-                        newCards.forEach { card ->
-                            rootService.currentGame!!.tableCards.add(card)
-                        }
-                    }
-                })
-            }
+    private fun drawThreeCards(newCards: MutableList<SchwimmenCard>) {
+        refreshDeckCount()
+        /* Create card images on top of the deck for animations */
+        newCards.forEach { card ->
+            addComponents(Label(
+                width = 190, height = 250, posY = 300, posX = 200,
+            ).apply {
+                this.isDisabled = true
+                var effect = CompoundVisual(ImageVisual(cardImageLoader.frontImageForCard(card)))
+                effect = viewEffect.hide(effect)
+                this.visual = effect
+                tableView.add(this, card)
+            })
         }
+        /* Play beautiful animations on each of the three drawn cards
+        * and make sure that each one is facing front upon landing */
+        this@SchwimmenGameScene.playAnimation(SequentialAnimation(
+            ParallelAnimation(
+                RotationAnimation(tableView.backward(newCards[0]), 360.0, 400),
+                MovementAnimation(tableView.backward(newCards[0]), 430, -150, 400),
+                FlipAnimation(tableView.backward(newCards[0]),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[0]), 190, 250)),
+                    400
+                )
+            ).apply {
+                onFinished = {
+                    tableView.backward(newCards[0]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[0]))
+                }
+            },
+            ParallelAnimation(
+                RotationAnimation(tableView.backward(newCards[1]), 360.0, 400),
+                MovementAnimation(tableView.backward(newCards[1]), 650, -150, 400),
+                FlipAnimation(tableView.backward(newCards[1]),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[1]), 190, 250)),
+                    300
+                )
+            ).apply {
+                onFinished = {
+                    tableView.backward(newCards[1]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[1]))
+                }
+            },
+            ParallelAnimation(
+                RotationAnimation(tableView.backward(newCards[2]), 360.0, 400),
+                MovementAnimation(tableView.backward(newCards[2]), 870, -150, 400),
+                FlipAnimation(tableView.backward(newCards[2]),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
+                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(newCards[2]), 190, 250)),
+                    200
+                )
+            ).apply {
+                onFinished = {
+                    tableView.backward(newCards[2]).visual = ImageVisual(cardImageLoader.frontImageForCard(newCards[2]))
+                }
+            }
+        ).apply {
+            onFinished = {
+                /* Since those labels are created for the sole purpose of animation,
+                * they have to be deleted, and recreated using [refreshView] */
+                newCards.forEach { card ->
+                    removeComponents(tableView.backward(card))
+                    tableView.remove(tableView.backward(card), card)
+                }
+                refreshView(oldSet = rootService.currentGame!!.tableCards, newSet = newCards, view = tableView)
+                rootService.currentGame!!.tableCards.clear()
+                newCards.forEach { card ->
+                    rootService.currentGame!!.tableCards.add(card)
+                }
+            }
+        })
     }
 
     /**
@@ -635,7 +752,7 @@ class SchwimmenGameScene(
         deckCount.text = "${rootService.currentGame!!.deck.cards.size} left"
         addComponents(showHideToggle, showHideText, handScore, deckCount,handScorePoints, nextButton)
         addComponents(actionChangeOne, actionChangeAll, actionKnock, actionPass)
-        refreshHandScore(rootService.currentGame!!.players[currentPlayer])
+        refreshHandScore()
         tableLabel.text = "Table cards"
         currentPlayerLabel.text = rootService.currentGame!!.players[0].name
         /* Create view for player cards */
@@ -741,7 +858,7 @@ class SchwimmenGameScene(
             )
             x += 220
         }
-        /* Create view for player names on the right with pass icons */
+        /* Create view for player names on the right with check view labels */
         var playerLabelsY = 250
         rootService.currentGame?.players?.forEach{
             addComponents(Label(
@@ -751,11 +868,7 @@ class SchwimmenGameScene(
                 this.isDisabled = true
                 namesView.add(this, it)
             }, Label(
-                posX = 1440, posY = playerLabelsY + 15, width = 40, height = 40,
-                /**
-                 * @author sang. https://pngtree.com/freepng/rotate-left-circular-arrow-blue_6421127.html
-                 */
-                visual = ImageVisual("images/Check.png")
+                posX = 1440, posY = playerLabelsY + 15, width = 40, height = 40
             ).apply {
                 this.isDisabled = true
                 checkView.add(this, it)

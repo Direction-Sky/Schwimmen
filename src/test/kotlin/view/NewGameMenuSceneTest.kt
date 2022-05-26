@@ -20,6 +20,5 @@ class NewGameMenuSceneTest {
         val gs = GameService(rs)
         gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
-        val gms = NewGameMenuScene(gs.rootService)
     }
 }

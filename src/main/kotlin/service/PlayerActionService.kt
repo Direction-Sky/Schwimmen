@@ -15,29 +15,22 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * The turn function is the backbone of our program. It keeps looping and switching
      * players based on the game rules.
      */
-    fun turn(): Unit {
-        var action: Turn
-        while(!rootService.currentGame!!.gameLoop) {
-            /**
-             * Game rule: all players have played once after a knock
-             */
-            if(afterKnock == rootService.currentGame!!.players.size) {
-                rootService.currentGame!!.gameLoop = false
-                continue
+    fun turn(
+        action: Turn,
+        player: SchwimmenPlayer,
+        handCard: SchwimmenCard? = null,
+        tableCard: SchwimmenCard? = null
+    ) {
+        if(!rootService.currentGame!!.gameLoop) {
+            if(afterKnock >= 1) {
+                afterKnock++
             }
-            for(player in rootService.currentGame!!.players) {
-                if(afterKnock >= 1) {
-                    afterKnock++
-                }
-                // wait for player's selection
-                action = Turn.PASS
 
-                when(action) {
-                    Turn.PASS -> pass(player)
-                    Turn.KNOCK -> knock(player)
-                    Turn.CHANGEONE -> changeOne(player,null ,null)
-                    Turn.CHANGEALL -> changeAll(player)
-                }
+            when(action) {
+                Turn.PASS -> pass(player)
+                Turn.KNOCK -> knock(player)
+                Turn.CHANGEONE -> changeOne(player, handCard, tableCard)
+                Turn.CHANGEALL -> changeAll(player)
             }
         }
     }
@@ -47,24 +40,30 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * and replaced with three cards from deck.
      * If deck has insufficient cards, then game has to be ended immediately
      * @param player is the person that is currently playing.
+     * @param returns three cards as a mutable list in case a full round had been passed.
+     * Otherwise, null. If the size of the returned [MutableList] is 0, that means the
+     * deck has insufficient cards.
      */
-    fun pass(player: SchwimmenPlayer): Unit {
+    fun pass(player: SchwimmenPlayer): MutableList<SchwimmenCard>? {
         rootService.currentGame!!.incrementPassCounter()
         /**
-         * Game rule: all players have passed -> throw table cards and draw 3 new ones
+         * Game rule: all players have passed -> throw table cards and draw 3 new ones.
          */
-        if (rootService.currentGame!!.passCounter() == rootService.currentGame!!.players.size) {
+        if (rootService.currentGame!!.passCounter == rootService.currentGame!!.players.size) {
+            val list = mutableListOf<SchwimmenCard>()
             rootService.currentGame!!.tableCards.clear()
             rootService.currentGame!!.deck.drawThreeCards()
-                ?.let { rootService.currentGame!!.tableCards.addAll(it) }
+                ?.let { list.addAll(it) }
             rootService.currentGame!!.passCounter = 0
             /**
              * Game rule: insufficient cards -> game over
              */
-            if (rootService.currentGame!!.tableCards.size == 0) {
+            if (list.size == 0) {
                 rootService.currentGame!!.gameLoop = false
             }
+            return list
         }
+        return null
     }
 
     /**
