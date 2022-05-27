@@ -396,7 +396,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                     players.add(SchwimmenPlayer(p4Input.text.trim()))
                 }
                 println("$players")
-                rootService.gameService.startGame(players)
+                //rootService.gameService.startGame(players)
+                rootService.currentGame = rootService.gameService.startGame(players)
+                println("${rootService.currentGame!!.players}")
+                println("${rootService.currentGame!!.tableCards}")
             }
         }
     }

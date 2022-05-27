@@ -12,7 +12,7 @@ class GameService(val rootService: RootService): AbstractRefreshingService() {
      * @param players is the list of assigned players that will be forwarded in order to create
      * a [SchwimmenGame] instance.
      */
-    fun startGame(players: List<SchwimmenPlayer>): Unit {
+    fun startGame(players: List<SchwimmenPlayer>): SchwimmenGame {
         val deck = Deck(mutableListOf())
         for (suit in listOf(CardSuit.CLUBS, CardSuit.SPADES, CardSuit.HEARTS, CardSuit.DIAMONDS)) {
             for (value in CardValue.shortDeck()) {
@@ -25,11 +25,11 @@ class GameService(val rootService: RootService): AbstractRefreshingService() {
                 player.handCards.add(it)
             }
         }
-        deck.drawThreeCards()?.let {
+        deck.drawThreeCards()!!.let {
             val newGame = SchwimmenGame(0, true, it, players, deck)
-            rootService.currentGame = newGame
+            //rootService.currentGame = newGame
+            onAllRefreshables { refreshAfterStartNewGame() }
+            return newGame
         }
-
-        onAllRefreshables { refreshAfterStartNewGame() }
     }
 }

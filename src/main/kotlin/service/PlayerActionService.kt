@@ -5,8 +5,8 @@ import entity.*
 /**
  * This class is responsible for managing and executing player actions.
  * @param rootService is a reference to [RootService] that hold connection with [GameService]
- * @property afterKnock refers to the number of players who've had a turn after someone had knocked.
- * Remains 0 until someone knocks. The knocking player is also included in the counting.
+ * @property afterKnock is the number of players who've had a turn after someone had knocked.
+ * 0 means nobody has knocked yet. The knocking player is also included in the counting.
  */
 class PlayerActionService(private val rootService: RootService): AbstractRefreshingService() {
     var afterKnock: Int = 0
