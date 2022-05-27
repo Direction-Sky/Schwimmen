@@ -29,7 +29,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     /**
      * Global font.
      */
-    val globalFont: Font = Font(
+    private val globalFont: Font = Font(
         size = 36, color = Color(239,239,239,255),
         family = "Comic Sans MS",
         fontWeight = Font.FontWeight.SEMI_BOLD,

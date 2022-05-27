@@ -9,10 +9,8 @@ import tools.aqua.bgw.animation.*
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.ToggleButton
-import tools.aqua.bgw.components.uicomponents.UIComponent
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.BoardGameScene
-import tools.aqua.bgw.event.AnimationFinishedEvent
 import tools.aqua.bgw.util.BidirectionalMap
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
@@ -75,9 +73,13 @@ class SchwimmenGameScene(
         fontWeight = Font.FontWeight.SEMI_BOLD,
     )
 
-    private val testCard: Label = Label(
-        10, 10, 130, 200,
-        visual = ImageVisual(cardImageLoader.getImageByCoordinates(4,2))
+    /**
+     * Schwimmen title at top left corner of the screen.
+     */
+    private val headline: Label = Label(
+        width = 400, height = 75, posX = 100, posY = 100,
+        text = "",
+        visual = ImageVisual("images/Schwimmen.png")
     ).apply {
         onMouseClicked = {
             /*
@@ -92,19 +94,10 @@ class SchwimmenGameScene(
             ))
             */
 
-            if(!initialized) {
-                initializeBoard()
-                initialized = true
-            }
-            println("Point 1 ${rootService.currentGame!!.tableCards}")
             refreshDeckCount()
-            println("Point 2 ${rootService.currentGame}")
-            println("Point 2 ${rootService.currentGame!!.players}")
-            println("Point 2 ${rootService.currentGame!!.players[currentPlayer]}")
-            refreshHandScore()
-            println("Point 4 ${rootService.currentGame!!.tableCards}")
-            println("Point 5 ${rootService.currentGame!!.tableCards}")
             println("${rootService.currentGame!!.tableCards}")
+            println("${rootService.currentGame!!.players[currentPlayer]}")
+            refreshHandScore()
         }
     }
 
@@ -195,7 +188,6 @@ class SchwimmenGameScene(
      */
     private val startButton = Button(
         width = 222, height = 107, posX = 835, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionStart.png")
     ).apply {
         onMouseEntered = {
@@ -214,27 +206,19 @@ class SchwimmenGameScene(
                     initializeBoard()
                     initialized = true
                 }
-                println("Point 1 ${rootService.currentGame!!.tableCards}")
                 refreshDeckCount()
-                println("Point 2 ${rootService.currentGame!!.tableCards}")
                 refreshHandScore()
-                println("Point 3 ${rootService.currentGame!!.tableCards}")
                 this.isDisabled = true
-                println("Point 4 ${rootService.currentGame!!.tableCards}")
                 removeComponents(this)
-                println("Point 5 ${rootService.currentGame!!.tableCards}")
             }
-            println("Point 6")
         }
-        println("Point 7")
-        /* After this point, table cards list is being cleared */
+        /* At this point, table cards list is being cleared */
 
     }
 
 
     private val actionChangeOne = Button(
         width = 222, height =  107, posX = 480, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionChangeOne.png")
     ).apply {
         onMouseEntered = {
@@ -300,17 +284,18 @@ class SchwimmenGameScene(
                         componentView = handView.backward(handSelection[0]),
                         byX = tableView.backward(tableSelection[0]).posX - handView.backward(handSelection[0]).posX,
                         byY = tableView.backward(tableSelection[0]).posY - handView.backward(handSelection[0]).posY,
-                        duration = 1000
+                        duration = 500
                     ),
                     MovementAnimation(
                         componentView = tableView.backward(tableSelection[0]),
                         byX = handView.backward(handSelection[0]).posX - tableView.backward(tableSelection[0]).posX,
                         byY = handView.backward(handSelection[0]).posY - tableView.backward(tableSelection[0]).posY,
-                        duration = 1000
+                        duration = 500
                     )
                 ).apply {
                     onFinished = {
-                        /* Swap selected cards */
+                        /* Swap selected cards. oldHand, oldTable are used to help find the correct
+                        * tuples with the UI components */
                         val oldHand = rootService.currentGame!!.players[currentPlayer].handCards.toList()
                         val oldTable = rootService.currentGame!!.tableCards.toList()
                         rootService.playerActionService.changeOne(
@@ -341,7 +326,6 @@ class SchwimmenGameScene(
 
     private val actionChangeAll = Button(
         width = 222, height =  107, posX = 710, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionChangeAll.png")
     ).apply {
         if(!this.isDisabled) {
@@ -352,13 +336,59 @@ class SchwimmenGameScene(
                 this.visual = ImageVisual("images/ActionChangeAll.png")
             }
             onMouseClicked = {
+                refreshActionButtons(this, true)
+                nextButton.isDisabled = true
+                nextButton.visual = ImageVisual("images/ActionNextDisabled.png")
+                /* Play beautiful movement animation on all cards */
+                /*
+                if(hidden) {
+                    flipCards(rootService.currentGame!!.players[currentPlayer].handCards.toList())
+                    flipCards(rootService.currentGame!!.tableCards.toList())
+                }
+                */
+                rootService.currentGame!!.players[currentPlayer].handCards.forEach { card ->
+                    playAnimation(ParallelAnimation(MovementAnimation(
+                        componentView = handView.backward(card),
+                        byY = -340,
+                        duration = 500
+                    ),
+                    MovementAnimation(
+                        componentView = tableView.backward(
+                            rootService.currentGame!!.tableCards[rootService.currentGame!!.players[currentPlayer].handCards.indexOf(card)]
+                        ),
+                        byY = 340,
+                        duration = 500
+                    )).apply {
+                        /* Reduce redundancy: perform following code after last animation */
+                        if(card == rootService.currentGame!!.players[currentPlayer].handCards[2]) {
+                            onFinished = {
+                                /* The two variables help locate UI Components in memory according to tuple */
+                                val oldHand: List<SchwimmenCard> =
+                                    rootService.currentGame!!.players[currentPlayer].handCards.toList()
+                                val oldTable: List<SchwimmenCard> = rootService.currentGame!!.tableCards.toList()
+                                /* Service layer: Change all */
+                                rootService.playerActionService.changeAll(rootService.currentGame!!.players[currentPlayer])
+                                /* Update representation */
+                                refreshView(
+                                    oldHand,
+                                    rootService.currentGame!!.players[currentPlayer].handCards.toList(),
+                                    handView
+                                )
+                                refreshView(oldTable, rootService.currentGame!!.tableCards.toList(), tableView)
+                                refreshHandScore()
+                                refreshCheckView()
+                                nextButton.isDisabled = false
+                                nextButton.visual = ImageVisual("images/ActionNext.png")
+                            }
+                        }
+                    })
+                }
             }
         }
     }
 
     private val actionKnock = Button(
         width = 222, height =  107, posX = 940, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionKnock.png")
     ).apply {
         if(!this.isDisabled) {
@@ -369,13 +399,16 @@ class SchwimmenGameScene(
                 this.visual = ImageVisual("images/ActionKnock.png")
             }
             onMouseClicked = {
+                refreshActionButtons(this, true)
+                /* Service layer: Knock */
+                rootService.playerActionService.knock(rootService.currentGame!!.players[currentPlayer])
+                refreshCheckView()
             }
         }
     }
 
     private val actionPass = Button(
         width = 222, height =  107, posX = 1170, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionPass.png")
     ).apply {
         onMouseEntered = {
@@ -430,71 +463,85 @@ class SchwimmenGameScene(
     ).apply {
         hidden = true
         selectedProperty.addListener { _, _ ->
-            /* Show cards */
-            if(this.isSelected) {
-                showHideText.text = "Hide"
-                hidden = false
-                refreshHandScore()
-                /* Play beautiful flip animation and refresh after it finishes */
-                rootService.currentGame!!.players[currentPlayer].handCards.forEach {
-                    this@SchwimmenGameScene.playAnimation(
-                        FlipAnimation(
-                            componentView = handView.backward(it),
-                            fromVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
-                            ),
-                            toVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
-                            ),
-                            duration = 300
-                        ).apply {
-                            /* No need to refresh after each animation. Only one is enough */
-                            if(it == rootService.currentGame!!.players[currentPlayer].handCards[2]) {
-                                onFinished = {
-                                    refreshView(
-                                        rootService.currentGame!!.players[currentPlayer].handCards.toList(),
-                                        rootService.currentGame!!.players[currentPlayer].handCards.toList(),
-                                        handView
-                                    )
-                                    refreshOKButton()
-                                }
-                            }
-                        }
-                    )
-                }
+            flipCards(rootService.currentGame!!.players[currentPlayer].handCards.toList())
+            hidden = when(this.isSelected) {
+                true -> false
+                false -> true
             }
-            /* Hide cards */
-            else {
-                showHideText.text = "Show"
-                hidden = true
-                refreshHandScore()
-                /* Play flip animation and refresh after it finishes */
-                rootService.currentGame!!.players[currentPlayer].handCards.forEach {
-                    this@SchwimmenGameScene.playAnimation(
-                        FlipAnimation(
-                            componentView = handView.backward(it),
-                            fromVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
-                            ),
-                            toVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
-                            ),
-                            duration = 300
-                        ).apply {
-                            /* No need to refresh after each animation. Only one is enough */
-                            if(it == rootService.currentGame!!.players[currentPlayer].handCards[2]) {
-                                onFinished = {
-                                    refreshView(
-                                        rootService.currentGame!!.players[currentPlayer].handCards,
-                                        rootService.currentGame!!.players[currentPlayer].handCards,
-                                        handView
-                                    )
-                                    refreshOKButton()
-                                }
+        }
+    }
+
+    /**
+     * Plays beautiful flip animations on passed cards.
+     * @param cards is the list of [SchwimmenCard], with which the paired [Label]s will
+     * be animated.
+     * @param view is the view that needs to be updated after animation is finished.
+     */
+    private fun flipCards(cards: List<SchwimmenCard>, view: BidirectionalMap<Label, SchwimmenCard> = handView) {
+        /* Show cards */
+        if(hidden) {
+            showHideText.text = "Hide"
+            hidden = false
+            refreshHandScore()
+            /* Play beautiful flip animation and refresh after it finishes */
+            cards.forEach {
+                this@SchwimmenGameScene.playAnimation(
+                    FlipAnimation(
+                        componentView = view.backward(it),
+                        fromVisual = ImageVisual(
+                            cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                        ),
+                        toVisual = ImageVisual(
+                            cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                        ),
+                        duration = 300
+                    ).apply {
+                        /* No need to refresh after each animation. Only one is enough */
+                        if(it == cards[2]) {
+                            onFinished = {
+                                refreshView(
+                                    oldSet = cards,
+                                    newSet = cards,
+                                    view = view
+                                )
+                                refreshOKButton()
                             }
                         }
-                    )
-                }
+                    }
+                )
+            }
+        }
+        /* Hide cards */
+        else {
+            showHideText.text = "Show"
+            hidden = true
+            refreshHandScore()
+            /* Play flip animation and refresh after it finishes */
+            cards.forEach {
+                this@SchwimmenGameScene.playAnimation(
+                    FlipAnimation(
+                        componentView = view.backward(it),
+                        fromVisual = ImageVisual(
+                            cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                        ),
+                        toVisual = ImageVisual(
+                            cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                        ),
+                        duration = 300
+                    ).apply {
+                        /* No need to refresh after each animation. Only one is enough */
+                        if(it == cards[2]) {
+                            onFinished = {
+                                refreshView(
+                                    cards,
+                                    cards,
+                                    view
+                                )
+                                refreshOKButton()
+                            }
+                        }
+                    }
+                )
             }
         }
     }
@@ -514,6 +561,14 @@ class SchwimmenGameScene(
         posX = 800, posY = 750, width = 300, height = 100,
         text = "Click Start", font = globalFont, alignment = Alignment.CENTER
     )
+
+    /**
+     * Ends the game. There are only two scenarios where this gets called according to game rules.
+     */
+    private fun finishGame() {
+        refreshActionButtons(nextButton, true)
+        removeComponents(nextButton)
+    }
 
     /**
      * @return the index of the next player in the circle, cycling between 0 and player count.
@@ -537,13 +592,14 @@ class SchwimmenGameScene(
      * Inherited from [Refreshable]. Prepares for the next player's turn.
      */
     override fun refreshAfterTurn() {
-        showHideToggle.isSelected = false
         refreshView(
             oldSet = rootService.currentGame!!.players[currentPlayer].handCards,
             newSet = rootService.currentGame!!.players[getNextPlayerIndex()].handCards,
             view = handView
         )
+        /* ATTENTION: THE FOLLOWING TWO LINES NEED TO BE EXACTLY IN THIS ORDER */
         refreshCurrentPlayerIndex()
+        showHideToggle.isSelected = false
         refreshPlayerNames()
         refreshHandScore()
     }
@@ -552,10 +608,10 @@ class SchwimmenGameScene(
      * Enables / disables action buttons after an action had been clicked.
      * @param clicked is the button triggering this action. This is used to check
      * it is [actionChangeOne] or not.
-     * @param disable set to true if desired action is to disable  the buttons.
+     * @param toDisable set to true if desired action is to disable  the buttons.
      */
-    private fun refreshActionButtons(clicked: Button, disable: Boolean) {
-        if(disable) {
+    private fun refreshActionButtons(clicked: Button, toDisable: Boolean) {
+        if(toDisable) {
             /* Disable action buttons -> enable next and vice versa */
             actionChangeOne.isDisabled = true
             actionChangeOne.visual = ImageVisual("images/ActionChangeOneDisabled.png")
@@ -565,6 +621,12 @@ class SchwimmenGameScene(
             actionKnock.visual = ImageVisual("images/ActionKnockDisabled.png")
             actionPass.isDisabled = true
             actionPass.visual = ImageVisual("images/ActionPassDisabled.png")
+            when(clicked) {
+                actionChangeOne -> actionChangeOne.visual = ImageVisual("images/ActionChangeOne.png")
+                actionChangeAll -> actionChangeAll.visual = ImageVisual("images/ActionChangeAll.png")
+                actionKnock -> actionKnock.visual = ImageVisual("images/ActionKnock.png")
+                actionPass -> actionPass.visual = ImageVisual("images/ActionPass.png")
+            }
             /* In all cases except for this one a player had to click Next clicking an action button */
             if(clicked != actionChangeOne) {
                 nextButton.isDisabled = false
@@ -726,11 +788,29 @@ class SchwimmenGameScene(
         if(rootService.playerActionService.afterKnock > 0) {
             checkView.backward(
                 rootService.currentGame!!.players[currentPlayer]
-            ).visual = ImageVisual(checkImage)
+            ).let { label ->
+                /* In case label might have been rotated earlier */
+                addComponents(Label(
+                    posX = label.posX, posY = label.posY, width = label.width, height = label.height,
+                    visual = ImageVisual(checkImage)
+                ))
+                /* If a player has just knocked */
+                if(rootService.playerActionService.afterKnock == 1) {
+                    rootService.currentGame!!.players.forEach { player ->
+                        checkView.backward(player).visual = Visual.EMPTY
+                    }
+                    addComponents(Label(
+                        posX = label.posX, posY = 180, width = 300, height = label.height,
+                        text = "Last round!", font = globalFont, alignment = Alignment.TOP_LEFT
+                    ))
+                }
+            }
             /* afterKnock will be incremented from playerActionService */
             if (rootService.playerActionService.afterKnock >= rootService.currentGame!!.players.size) {
                 /* finish game */
+                finishGame()
             }
+            rootService.playerActionService.afterKnock++
         }
         /* Pass section */
         else {
@@ -896,14 +976,11 @@ class SchwimmenGameScene(
         )
         okButton.visual = Visual.EMPTY
         refreshHandScore()
-        println("Check point ${rootService.currentGame}")
         /* Create view for table cards with beautiful animations */
-        println("Before draw: ${rootService.currentGame!!.tableCards}")
         drawThreeCards(
             oldCards = null,
             newCards = rootService.currentGame!!.tableCards
         )
-        println("after Draw: ${rootService.currentGame!!.tableCards}")
         /* Create view for player cards */
         refreshView(null, rootService.currentGame!!.players[currentPlayer].handCards, handView)
 
@@ -925,7 +1002,6 @@ class SchwimmenGameScene(
             playerLabelsY += 70
         }
         refreshPlayerNames()
-        println("${rootService.currentGame!!.tableCards}")
     }
 
     init {
@@ -935,7 +1011,7 @@ class SchwimmenGameScene(
         )
         opacity = 1.0
         addComponents(
-            deck, exitButton, testCard, currentPlayerLabel, startButton
+            deck, exitButton, headline, currentPlayerLabel, startButton
         )
         //refreshOKButton()
     }
