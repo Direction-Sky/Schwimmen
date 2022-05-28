@@ -43,8 +43,6 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         "-fx-background-color: rgba(0, 0, 0, 0.0);" +
         "-fx-background-image: url('images/TextInputField.png');" +
         "-fx-background-size: cover;" +
-        // "-fx-src: url('/font/Boogaloo-Regular.ttf');" +
-        //"-fx-font-family: 'Boogaloo'" +
         "-fx-alignment: center;"
     )
 
@@ -60,18 +58,18 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
      * First things first
      */
     private val tuButton = Label(
-        width = 192, height =  192, posX = 108, posY = 70,
-        visual = ImageVisual("images/TUButton2.png")
+        width = 128, height =  128, posX = 1752, posY = 40,
+        visual = ImageVisual("images/TUButtonSmall.png")
     ).apply {
         if(!this.isDisabled) {
             onMouseEntered = {
-                this.visual = ImageVisual("images/TUButtonHover2.png")
+                this.visual = ImageVisual("images/TUButtonSmallHover.png")
             }
             onMouseExited = {
-                this.visual = ImageVisual("images/TUButton2.png")
+                this.visual = ImageVisual("images/TUButtonSmall.png")
             }
             onMousePressed = {
-                this.visual = ImageVisual("images/TUButtonPressed2.png")
+                //this.visual = ImageVisual("images/TUButtonPressed2.png")
             }
             onMouseClicked = {
                 app.showDialog(Dialog(
@@ -190,11 +188,38 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     /**
      * Schwimmen title in the middle top of the screen.
      */
-    private val headlineLabel = Label(
+    private val schwimmenLabel = Label(
         width = 876, height = 152, posX = 522, posY = 85,
         text = "",
         visual = ImageVisual("images/Schwimmen.png")
-    )
+    ).apply {
+        onMouseEntered = {
+            this.visual = ImageVisual("images/SchwimmenHover2.png")
+        }
+        onMouseExited = {
+            this.visual = ImageVisual("images/Schwimmen.png")
+        }
+        onMouseClicked = {
+            app.showDialog(Dialog(
+                dialogType = DialogType.INFORMATION,
+                title = "How to play",
+                header = "",
+                message = (
+                    "- Player with highest score wins.\n" +
+                    "- All cards have same value -> 30.5.\n" +
+                    "- Cards of the same suit can be summed together.\n" +
+                    "- 10, J, Q, K -> 10, A -> 11\n" +
+                    "- If a full circle is passed, 3 new cards from deck\n" +
+                    "  are to be drawn replacing the old table cards.\n" +
+                    "- In case a full circle is passed and deck has less\n" +
+                    "  than three cards, game will end on the spot.\n" +
+                    "- If someone knocks, each player gets to play one\n" +
+                    "  turn and then game will end.\n\n" +
+                    "Good luck and have fun!"
+                )
+            ))
+        }
+    }
 
     /**
      * Player 1 label on the left. Permanently visible.
@@ -430,8 +455,8 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         )
         opacity = .5
         addComponents(
-            helpButton, tuButton,
-            headlineLabel,
+            tuButton,
+            schwimmenLabel,
             p1Label, p1Input,
             p2Label, p2Input,
             addButton3, p3Label, p3Input, removeButton3,

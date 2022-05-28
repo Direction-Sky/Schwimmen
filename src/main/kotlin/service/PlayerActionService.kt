@@ -86,11 +86,11 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
     fun changeOne(player: SchwimmenPlayer, hand: SchwimmenCard?, table: SchwimmenCard?): Unit {
         rootService.currentGame!!.tableCards.let {
             // It is important to remember the indices of our cards to keep the order
-            val tableIndex = rootService.currentGame!!.tableCards.indexOf(table)
+            val tableIndex = rootService.currentGame?.tableCards?.indexOf(table)
             val handIndex = player.handCards.indexOf(hand)
             it.remove(table)
             player.handCards.remove(hand)
-            hand?.let { h -> it.add(tableIndex, h) }
+            hand?.let { h -> it.add(tableIndex!!, h) }
             table?.let { t -> player.handCards.add(handIndex, t) }
         }
         rootService.currentGame!!.passCounter = 0

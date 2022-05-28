@@ -6,11 +6,14 @@ import entity.SchwimmenGame
 import service.CardImageLoader
 import service.RootService
 import tools.aqua.bgw.animation.*
+import tools.aqua.bgw.components.gamecomponentviews.CardView
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.ToggleButton
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.BoardGameScene
+import tools.aqua.bgw.dialog.Dialog
+import tools.aqua.bgw.dialog.DialogType
 import tools.aqua.bgw.util.BidirectionalMap
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
@@ -76,12 +79,43 @@ class SchwimmenGameScene(
     /**
      * Schwimmen title at top left corner of the screen.
      */
-    private val headline: Label = Label(
+    private val schwimmenLabel: Label = Label(
         width = 400, height = 75, posX = 100, posY = 100,
         text = "",
         visual = ImageVisual("images/Schwimmen.png")
     ).apply {
+        onMouseEntered = {
+            this.visual = ImageVisual("images/SchwimmenHover2.png")
+        }
+        onMouseExited = {
+            this.visual = ImageVisual("images/Schwimmen.png")
+        }
         onMouseClicked = {
+            app.showDialog(
+                Dialog(
+                    dialogType = DialogType.INFORMATION,
+                    title = "How to play",
+                    header = "",
+                    message = (
+                        "- Player with highest score wins.\n" +
+                        "- All cards have same value -> 30.5.\n" +
+                        "- Cards of the same suit can be summed together.\n" +
+                        "- 10, J, Q, K -> 10, A -> 11\n" +
+                        "- If a full circle is passed, 3 new cards from deck\n" +
+                        "  are to be drawn replacing the old table cards.\n" +
+                        "- In case a full circle is passed and deck has less\n" +
+                        "  than three cards, game will end on the spot.\n" +
+                        "- If someone knocks, each player gets to play one\n" +
+                        "  turn and then game will end.\n\n" +
+                        "Good luck and have fun!"
+                    )
+                )
+            )
+
+            refreshDeckCount()
+            println("${rootService.currentGame!!.tableCards}")
+            println("${rootService.currentGame!!.players[currentPlayer]}")
+            refreshHandScore()
             /*
             this@SchwimmenGameScene.playAnimation(ParallelAnimation(
                 RotationAnimation(this, 360.0, 400),
@@ -93,11 +127,6 @@ class SchwimmenGameScene(
                 )
             ))
             */
-
-            refreshDeckCount()
-            println("${rootService.currentGame!!.tableCards}")
-            println("${rootService.currentGame!!.players[currentPlayer]}")
-            refreshHandScore()
         }
     }
 
@@ -133,13 +162,60 @@ class SchwimmenGameScene(
         }
     }
 
+    private val testCard: CardView = CardView(
+        posX = 200, posY = 300, width = 190, height = 250,
+        front = ImageVisual(cardImageLoader.backImage),
+        back = ImageVisual(cardImageLoader.backImage)
+    )
     /**
      * This is just a visual that shows the back image of a card representing the deck.
      */
     val deck = Label(
         width = 190, height = 250, posY = 300, posX = 200,
-        visual = ImageVisual(cardImageLoader.getImageByCoordinates(0,4))
-    ).apply { this.isDisabled = true }
+    ).apply {
+        isDisabled = true
+        var effect = CompoundVisual(ImageVisual(cardImageLoader.getImageByCoordinates(0,4)))
+        visual = effect
+        onMouseEntered = {
+            if(!this.isDisabled) {
+                effect = viewEffect.hover(effect)
+                visual = effect
+            }
+        }
+        onMouseExited = {
+            if(!this.isDisabled) {
+                effect = viewEffect.unhover(effect)
+                visual = effect
+            }
+        }
+        onMouseClicked = {
+            if(!this.isDisabled) {
+                addComponents(testCard)
+                this.isDisabled = true
+                this.visual = Visual.EMPTY
+                val visuals: MutableList<Visual> = mutableListOf()
+                rootService.currentGame!!.deck.cards.forEach { card ->
+                    visuals.add(ImageVisual(cardImageLoader.resizedBufferedImage(
+                        cardImageLoader.frontImageForCard(card), 190, 250)
+                    ))
+                }
+                playAnimation(RandomizeAnimation(
+                    componentView = testCard,
+                    visuals = visuals.toList(),
+                    toVisual = ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
+                    duration = rootService.currentGame!!.deck.cards.size * 100,
+                ).apply {
+                    onFinished = {
+                        refreshDeckCount()
+                        visual = ImageVisual(cardImageLoader.backImage)
+                        isDisabled = false
+                        removeComponents(testCard)
+                        rootService.currentGame!!.deck.cards.shuffle()
+                    }
+                })
+            }
+        }
+    }
 
     private val deckCount = Label(
         posX = deck.posX, posY = deck.posY + 235,
@@ -339,26 +415,48 @@ class SchwimmenGameScene(
                 refreshActionButtons(this, true)
                 nextButton.isDisabled = true
                 nextButton.visual = ImageVisual("images/ActionNextDisabled.png")
-                /* Play beautiful movement animation on all cards */
-                /*
-                if(hidden) {
-                    flipCards(rootService.currentGame!!.players[currentPlayer].handCards.toList())
-                    flipCards(rootService.currentGame!!.tableCards.toList())
-                }
-                */
                 rootService.currentGame!!.players[currentPlayer].handCards.forEach { card ->
-                    playAnimation(ParallelAnimation(MovementAnimation(
-                        componentView = handView.backward(card),
-                        byY = -340,
-                        duration = 500
-                    ),
-                    MovementAnimation(
-                        componentView = tableView.backward(
-                            rootService.currentGame!!.tableCards[rootService.currentGame!!.players[currentPlayer].handCards.indexOf(card)]
-                        ),
-                        byY = 340,
-                        duration = 500
-                    )).apply {
+                    playAnimation(ParallelAnimation(
+                        MovementAnimation(
+                            componentView = handView.backward(card),
+                            byY = -340,
+                            duration = 500
+                        ).apply {
+                            if(hidden) {
+                                playAnimation(FlipAnimation(
+                                    componentView = handView.backward(card),
+                                    fromVisual = ImageVisual(
+                                        cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                                    ),
+                                    toVisual = ImageVisual(
+                                        cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(card), 190, 250)
+                                    ),
+                                    duration = 500
+                                ))
+                            }
+                        },
+                        MovementAnimation(
+                            componentView = tableView.backward(
+                                rootService.currentGame!!.tableCards[rootService.currentGame!!.players[currentPlayer].handCards.indexOf(card)]
+                            ),
+                            byY = 340,
+                            duration = 500
+                        ).apply {
+                            if(hidden) {
+                                playAnimation(FlipAnimation(
+                                    componentView = tableView.backward(
+                                        rootService.currentGame!!.tableCards[rootService.currentGame!!.players[currentPlayer].handCards.indexOf(card)]
+                                    ),
+                                    fromVisual = ImageVisual(
+                                        cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(rootService.currentGame!!.tableCards[rootService.currentGame!!.players[currentPlayer].handCards.indexOf(card)]), 190, 250)
+                                    ),
+                                    toVisual = ImageVisual(
+                                        cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                                        ),
+                                    duration = 500
+                                ))
+                            }
+                        }).apply {
                         /* Reduce redundancy: perform following code after last animation */
                         if(card == rootService.currentGame!!.players[currentPlayer].handCards[2]) {
                             onFinished = {
@@ -431,7 +529,7 @@ class SchwimmenGameScene(
                     /* If the list is empty, this means deck had insufficient cards */
                     if(list.size == 0) {
                         // End the game
-                        rootService.currentGame!!.gameLoop = false
+                        finishGame()
                     }
                     else {
                         drawThreeCards(
@@ -568,6 +666,7 @@ class SchwimmenGameScene(
     private fun finishGame() {
         refreshActionButtons(nextButton, true)
         removeComponents(nextButton)
+        rootService.currentGame!!.gameLoop = false)
     }
 
     /**
@@ -749,7 +848,7 @@ class SchwimmenGameScene(
     private fun refreshDeckCount() {
         this@SchwimmenGameScene.playAnimation(SequentialAnimation(
             MovementAnimation(deckCount, 0, -3,200).apply {
-                onFinished = { deckCount.text = "${rootService.currentGame!!.deck.cards.size} left" }
+                onFinished = { deckCount.text = "${rootService.currentGame?.deck?.cards?.size} left" }
             },
             MovementAnimation(deckCount, 0, 6,100)
         ))
@@ -939,7 +1038,9 @@ class SchwimmenGameScene(
                 tableSelection.clear()
                 refreshOKButton()
                 rootService.currentGame!!.tableCards.clear()
-                rootService.currentGame!!.tableCards.addAll(newCards)
+                /* Using tableView.getCoDomain() proved to be working, where as addAll(newCards) didn't,
+                * noting that newCards at this point will be empty as well. */
+                rootService.currentGame!!.tableCards.addAll(tableView.getCoDomain())
             }
         })
     }
@@ -969,7 +1070,7 @@ class SchwimmenGameScene(
      * order to avoid null exceptions.
      */
     private fun initializeBoard() {
-        //deckCount.text = "${rootService.currentGame!!.deck.cards.size} left"
+        deck.isDisabled = false
         addComponents(
             showHideToggle, showHideText, handScore, deckCount,handScorePoints, tableLabel,
             actionChangeOne, actionChangeAll, actionKnock, actionPass, okButton, nextButton
@@ -1011,8 +1112,7 @@ class SchwimmenGameScene(
         )
         opacity = 1.0
         addComponents(
-            deck, exitButton, headline, currentPlayerLabel, startButton
+            deck, exitButton, schwimmenLabel, currentPlayerLabel, startButton
         )
-        //refreshOKButton()
     }
 }
