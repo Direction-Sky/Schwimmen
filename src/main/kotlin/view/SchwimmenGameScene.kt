@@ -666,7 +666,7 @@ class SchwimmenGameScene(
     private fun finishGame() {
         refreshActionButtons(nextButton, true)
         removeComponents(nextButton)
-        rootService.currentGame!!.gameLoop = false)
+        rootService.currentGame!!.gameLoop = false
     }
 
     /**
