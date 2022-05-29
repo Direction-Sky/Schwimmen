@@ -24,4 +24,8 @@ interface Refreshable {
      */
     fun refreshAfterGameEnd() {}
 
+    /**
+     * After closing the leaderboard -> main menu
+     */
+    fun refreshAfterLeaderboard() {}
 }

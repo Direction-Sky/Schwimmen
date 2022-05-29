@@ -23,7 +23,7 @@ class ChangeAllTest {
     fun changeAllTest() {
         val rs = RootService()
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
         val oldTable = "${gs.rootService.currentGame!!.tableCards}"
         println("Table before swapping all: $oldTable")

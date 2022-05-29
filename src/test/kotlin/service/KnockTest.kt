@@ -22,7 +22,7 @@ class KnockTest {
     fun knockTest() {
         val rs = RootService()
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
         pas.pass(pList[0])
         assertEquals(1, gs.rootService.currentGame!!.passCounter)

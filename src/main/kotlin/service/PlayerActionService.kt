@@ -45,6 +45,9 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * deck has insufficient cards.
      */
     fun pass(player: SchwimmenPlayer): MutableList<SchwimmenCard>? {
+        if(afterKnock >= 1) {
+            afterKnock++
+        }
         rootService.currentGame!!.incrementPassCounter()
         /**
          * Game rule: all players have passed -> throw table cards and draw 3 new ones.
@@ -70,7 +73,7 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * Once a player has knocked, a countdown is started, so that each player gets exactly one turn after.
      * @param player is the person that is currently playing.
      */
-    fun knock(player: SchwimmenPlayer): Unit {
+    fun knock(player: SchwimmenPlayer) {
         if(afterKnock == 0) {
             afterKnock++
         }
@@ -83,7 +86,11 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * @param hand is the selected card from hand.
      * @param table is the selected card from table.
      */
-    fun changeOne(player: SchwimmenPlayer, hand: SchwimmenCard?, table: SchwimmenCard?): Unit {
+    fun changeOne(player: SchwimmenPlayer, hand: SchwimmenCard?, table: SchwimmenCard?) {
+        if(afterKnock >= 1) {
+            afterKnock++
+        }
+        rootService.currentGame!!.passCounter = 0
         rootService.currentGame!!.tableCards.let {
             // It is important to remember the indices of our cards to keep the order
             val tableIndex = rootService.currentGame?.tableCards?.indexOf(table)
@@ -93,20 +100,22 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
             hand?.let { h -> it.add(tableIndex!!, h) }
             table?.let { t -> player.handCards.add(handIndex, t) }
         }
-        rootService.currentGame!!.passCounter = 0
     }
 
     /**
      * Swaps a player's hand with the cards on the table.
      * @param player is the person that is currently playing.
      */
-    fun changeAll(player: SchwimmenPlayer): Unit {
+    fun changeAll(player: SchwimmenPlayer) {
+        if(afterKnock >= 1) {
+            afterKnock++
+        }
+        rootService.currentGame!!.passCounter = 0
         for(i in 1..3) {
             rootService.currentGame!!.tableCards.let {
                 player.handCards.add(it.removeFirst())
                 it.add(player.handCards.removeFirst())
             }
         }
-        rootService.currentGame!!.passCounter = 0
     }
 }

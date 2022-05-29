@@ -1,8 +1,9 @@
 import view.SchwimmenApplication
-import view.SopraApplication
 
+/**
+ * @author Ahmad Jammal. TU Dortmund, Germany.
+ */
 fun main() {
-    /*SopraApplication().show()
-    println("Application ended. Goodbye")*/
     SchwimmenApplication().show()
+    println("Application ended. Goodbye")
 }

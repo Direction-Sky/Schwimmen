@@ -55,10 +55,47 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     )
 
     /**
-     * First things first
+     * Schwimmen title in the middle top of the screen.
      */
-    private val tuButton = Label(
-        width = 128, height =  128, posX = 1752, posY = 40,
+    private val schwimmenLabel = Label(
+        width = 876, height = 152, posX = 522, posY = 85,
+        text = "",
+        visual = ImageVisual("images/Schwimmen.png")
+    ).apply {
+        onMouseEntered = {
+            this.visual = ImageVisual("images/SchwimmenHover.png")
+        }
+        onMouseExited = {
+            this.visual = ImageVisual("images/Schwimmen.png")
+        }
+        onMouseClicked = {
+            app.showDialog(Dialog(
+                dialogType = DialogType.INFORMATION,
+                title = "How to play",
+                header = "",
+                message = (
+                        "- Player with highest score wins.\n" +
+                                "- All cards have same value -> 30.5.\n" +
+                                "- Cards of the same suit can be summed together.\n" +
+                                "- 10, J, Q, K -> 10, A -> 11\n" +
+                                "- If a full circle is passed, 3 new cards from deck\n" +
+                                "  are to be drawn replacing the old table cards.\n" +
+                                "- In case a full circle is passed and deck has less\n" +
+                                "  than three cards, game will end on the spot.\n" +
+                                "- If someone knocks, each player gets to play one\n" +
+                                "  turn and then game will end.\n\n" +
+                                "Good luck and have fun!"
+                        )
+            ))
+        }
+    }
+
+    /**
+     * First things first
+     * @author Ahmad Jammal.
+     */
+    private val tuButton = Button(
+        width = 100, height =  100, posX = 1800, posY = 20,
         visual = ImageVisual("images/TUButtonSmall.png")
     ).apply {
         if(!this.isDisabled) {
@@ -77,44 +114,6 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                     title = "TU Dortmund",
                     header = "Technische Universität Dortmund",
                     message = "https://www.tu-dortmund.de/"
-                ))
-            }
-        }
-    }
-
-    /**
-     * Shows game rules as a dialog window.
-     */
-    private val helpButton = Label(
-        width = 192, height =  192, posX = 1620, posY = 70,
-        visual = ImageVisual("images/HelpButton.png")
-    ).apply {
-        if(!this.isDisabled) {
-            onMouseEntered = {
-                this.visual = ImageVisual("images/HelpButtonHover.png")
-            }
-            onMouseExited = {
-                this.visual = ImageVisual("images/HelpButton.png")
-            }
-            onMousePressed = {
-                this.visual = ImageVisual("images/HelpButtonPressed.png")
-            }
-            onMouseClicked = {
-                app.showDialog(Dialog(
-                    dialogType = DialogType.INFORMATION,
-                    title = "How to play",
-                    header = "",
-                    message = "- Player with highest score wins.\n" +
-                        "- All cards have same value -> 30.5.\n" +
-                        "- Cards of the same suit can be summed together.\n" +
-                        "- 10, J, Q, K -> 10, A -> 11\n" +
-                        "- If a full circle is passed, 3 new cards from deck\n" +
-                        "  are to be drawn replacing the old table cards.\n" +
-                        "- In case a full circle is passed and deck has less\n" +
-                        "  than three cards, game will end on the spot.\n" +
-                        "- If someone knocks, each player gets to play one\n" +
-                        "  turn and then game will end.\n\n" +
-                        "Good luck and have fun!"
                 ))
             }
         }
@@ -182,42 +181,6 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         this.isDisabled = true
         onKeyTyped = {
             countPlayers()
-        }
-    }
-
-    /**
-     * Schwimmen title in the middle top of the screen.
-     */
-    private val schwimmenLabel = Label(
-        width = 876, height = 152, posX = 522, posY = 85,
-        text = "",
-        visual = ImageVisual("images/Schwimmen.png")
-    ).apply {
-        onMouseEntered = {
-            this.visual = ImageVisual("images/SchwimmenHover2.png")
-        }
-        onMouseExited = {
-            this.visual = ImageVisual("images/Schwimmen.png")
-        }
-        onMouseClicked = {
-            app.showDialog(Dialog(
-                dialogType = DialogType.INFORMATION,
-                title = "How to play",
-                header = "",
-                message = (
-                    "- Player with highest score wins.\n" +
-                    "- All cards have same value -> 30.5.\n" +
-                    "- Cards of the same suit can be summed together.\n" +
-                    "- 10, J, Q, K -> 10, A -> 11\n" +
-                    "- If a full circle is passed, 3 new cards from deck\n" +
-                    "  are to be drawn replacing the old table cards.\n" +
-                    "- In case a full circle is passed and deck has less\n" +
-                    "  than three cards, game will end on the spot.\n" +
-                    "- If someone knocks, each player gets to play one\n" +
-                    "  turn and then game will end.\n\n" +
-                    "Good luck and have fun!"
-                )
-            ))
         }
     }
 
@@ -414,17 +377,13 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
                 if(!p2Input.text.isBlank()) {
                     players.add(SchwimmenPlayer(p2Input.text.trim()))
                 }
-                if(!p3Input.isDisabled && !p3Input.text.isBlank()) {
+                if(!p3Input.isDisabled && p3Input.text.isNotBlank()) {
                     players.add(SchwimmenPlayer(p3Input.text.trim()))
                 }
-                if(!p4Input.isDisabled && !p4Input.text.isBlank()) {
+                if(!p4Input.isDisabled && p4Input.text.isNotBlank()) {
                     players.add(SchwimmenPlayer(p4Input.text.trim()))
                 }
-                println("$players")
-                //rootService.gameService.startGame(players)
                 rootService.currentGame = rootService.gameService.startGame(players)
-                println("${rootService.currentGame!!.players}")
-                println("${rootService.currentGame!!.tableCards}")
             }
         }
     }

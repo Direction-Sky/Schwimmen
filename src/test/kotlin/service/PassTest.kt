@@ -21,7 +21,7 @@ class PassTest {
     @Test
     fun passTestCaseOne() {
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
         // Before pass
         assertEquals(0, gs.rootService.currentGame!!.passCounter)
@@ -38,7 +38,7 @@ class PassTest {
     @Test
     fun passTestCaseTwo() {
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
         // Before passing
         assertEquals(0, gs.rootService.currentGame!!.passCounter, "Before pass")
@@ -63,7 +63,7 @@ class PassTest {
     @Test
     fun passTestCaseThree() {
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
         // Before passing
         assertEquals(0, gs.rootService.currentGame!!.passCounter, "Before pass")

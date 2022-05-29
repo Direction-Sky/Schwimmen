@@ -32,4 +32,13 @@ class GameService(val rootService: RootService): AbstractRefreshingService() {
             return newGame
         }
     }
+
+    /**
+     * Resets [SchwimmenGame.gameLoop] and [PlayerActionService.afterKnock].
+     */
+    fun finishGame() {
+        rootService.currentGame!!.gameLoop = false
+        //rootService.currentGame = null
+        rootService.playerActionService.afterKnock = 0
+    }
 }

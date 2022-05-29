@@ -22,6 +22,8 @@ import java.awt.Color
 /**
  * In-game scene.
  * @author Ahmad Jammal.
+ * @param app is used to display [Dialog].
+ * @param rootService is the glue that holds all pieces together.
  * @property cardImageLoader is used to load buffer image.
  * @property viewEffect provides visual effects on mouse actions as well as show / hide features.
  * @property handView is a tuple set of type ([Label], [SchwimmenCard]), where the card belongs to the current [SchwimmenPlayer].
@@ -35,9 +37,10 @@ import java.awt.Color
  * @property globalFont is the standard font used in this UI.
  * @property handSelection is the list of selected cards from hand. This is necessary for [actionChangeOne].
  * @property tableSelection is the list of selected cards from table. This is necessary for [actionChangeOne].
+ * @property okButtonActive is used in correlation with [actionChangeOne].
  */
 class SchwimmenGameScene(
-    val app: SchwimmenApplication,
+    private val app: SchwimmenApplication,
     private val rootService: RootService): BoardGameScene(1920, 1080), Refreshable {
 
     private val cardImageLoader = CardImageLoader()
@@ -81,11 +84,10 @@ class SchwimmenGameScene(
      */
     private val schwimmenLabel: Label = Label(
         width = 400, height = 75, posX = 100, posY = 100,
-        text = "",
         visual = ImageVisual("images/Schwimmen.png")
     ).apply {
         onMouseEntered = {
-            this.visual = ImageVisual("images/SchwimmenHover2.png")
+            this.visual = ImageVisual("images/SchwimmenHover.png")
         }
         onMouseExited = {
             this.visual = ImageVisual("images/Schwimmen.png")
@@ -111,22 +113,6 @@ class SchwimmenGameScene(
                     )
                 )
             )
-
-            refreshDeckCount()
-            println("${rootService.currentGame!!.tableCards}")
-            println("${rootService.currentGame!!.players[currentPlayer]}")
-            refreshHandScore()
-            /*
-            this@SchwimmenGameScene.playAnimation(ParallelAnimation(
-                RotationAnimation(this, 360.0, 400),
-                MovementAnimation(this, 200, 0, 400),
-                FlipAnimation(this,
-                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.getImageByCoordinates(4,2), 130, 200)),
-                    ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 130, 200)),
-                    200
-                )
-            ))
-            */
         }
     }
 
@@ -162,7 +148,11 @@ class SchwimmenGameScene(
         }
     }
 
-    private val testCard: CardView = CardView(
+    /**
+     * This is used to play beautiful flip animations on deck. Flip can only
+     * be played on a CardView object. Labels don't work.
+     */
+    private val deckFlip: CardView = CardView(
         posX = 200, posY = 300, width = 190, height = 250,
         front = ImageVisual(cardImageLoader.backImage),
         back = ImageVisual(cardImageLoader.backImage)
@@ -173,8 +163,7 @@ class SchwimmenGameScene(
     val deck = Label(
         width = 190, height = 250, posY = 300, posX = 200,
     ).apply {
-        isDisabled = true
-        var effect = CompoundVisual(ImageVisual(cardImageLoader.getImageByCoordinates(0,4)))
+        var effect = CompoundVisual(ImageVisual(cardImageLoader.backImage))
         visual = effect
         onMouseEntered = {
             if(!this.isDisabled) {
@@ -190,7 +179,11 @@ class SchwimmenGameScene(
         }
         onMouseClicked = {
             if(!this.isDisabled) {
-                addComponents(testCard)
+                if(!initialized) {
+                    startButton.isDisabled = true
+                    startButton.visual = ImageVisual("images/StartButtonDisabled.png")
+                }
+                addComponents(deckFlip)
                 this.isDisabled = true
                 this.visual = Visual.EMPTY
                 val visuals: MutableList<Visual> = mutableListOf()
@@ -200,16 +193,24 @@ class SchwimmenGameScene(
                     ))
                 }
                 playAnimation(RandomizeAnimation(
-                    componentView = testCard,
+                    componentView = deckFlip,
                     visuals = visuals.toList(),
                     toVisual = ImageVisual(cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)),
                     duration = rootService.currentGame!!.deck.cards.size * 100,
+                    speed = rootService.currentGame!!.deck.cards.size * 5
                 ).apply {
                     onFinished = {
-                        refreshDeckCount()
+                        /* This is important in order to avoid exceptions. */
+                        if(!initialized) {
+                            startButton.isDisabled = false
+                            startButton.visual = ImageVisual("images/ActionStart.png")
+                        }
+                        else {
+                            refreshDeckCount()
+                        }
                         visual = ImageVisual(cardImageLoader.backImage)
                         isDisabled = false
-                        removeComponents(testCard)
+                        removeComponents(deckFlip)
                         rootService.currentGame!!.deck.cards.shuffle()
                     }
                 })
@@ -266,6 +267,7 @@ class SchwimmenGameScene(
         width = 222, height = 107, posX = 835, posY = 871,
         visual = ImageVisual("images/ActionStart.png")
     ).apply {
+        this.isDisabled = false
         onMouseEntered = {
             if (!this.isDisabled) {
                 this.visual = ImageVisual("images/ActionStartHover.png")
@@ -528,7 +530,6 @@ class SchwimmenGameScene(
                 if(list != null) {
                     /* If the list is empty, this means deck had insufficient cards */
                     if(list.size == 0) {
-                        // End the game
                         finishGame()
                     }
                     else {
@@ -661,15 +662,6 @@ class SchwimmenGameScene(
     )
 
     /**
-     * Ends the game. There are only two scenarios where this gets called according to game rules.
-     */
-    private fun finishGame() {
-        refreshActionButtons(nextButton, true)
-        removeComponents(nextButton)
-        rootService.currentGame!!.gameLoop = false
-    }
-
-    /**
      * @return the index of the next player in the circle, cycling between 0 and player count.
      */
     private fun getNextPlayerIndex(): Int {
@@ -737,12 +729,20 @@ class SchwimmenGameScene(
             actionChangeOne.visual = ImageVisual("images/ActionChangeOne.png")
             actionChangeAll.isDisabled = false
             actionChangeAll.visual = ImageVisual("images/ActionChangeAll.png")
-            actionKnock.isDisabled = false
-            actionKnock.visual = ImageVisual("images/ActionKnock.png")
             actionPass.isDisabled = false
             actionPass.visual = ImageVisual("images/ActionPass.png")
             nextButton.isDisabled = true
             nextButton.visual = ImageVisual("images/ActionNextDisabled.png")
+            /* Only re-enable Knock if nobody has knocked yet */
+            if(rootService.playerActionService.afterKnock == 0) {
+                actionKnock.isDisabled = false
+                actionKnock.visual = ImageVisual("images/ActionKnock.png")
+            }
+            /* In case someone has just knocked, knock button needs to be disabled and changed to gray */
+            if(rootService.playerActionService.afterKnock == 1) {
+                actionKnock.isDisabled = true
+                actionKnock.visual = ImageVisual("images/ActionKnockDisabled.png")
+            }
         }
 
     }
@@ -909,7 +909,6 @@ class SchwimmenGameScene(
                 /* finish game */
                 finishGame()
             }
-            rootService.playerActionService.afterKnock++
         }
         /* Pass section */
         else {
@@ -963,7 +962,7 @@ class SchwimmenGameScene(
      * and makes sure that [SchwimmenGame.tableCards] has exactly
      * three cards by the end.
      */
-    private fun drawThreeCards(oldCards: List<SchwimmenCard>?, newCards: List<SchwimmenCard>, init: Boolean = initialized) {
+    private fun drawThreeCards(oldCards: List<SchwimmenCard>?, newCards: List<SchwimmenCard>) {
         refreshDeckCount()
         /* Create card images on top of the deck for animations */
         newCards.forEach { card ->
@@ -1058,7 +1057,6 @@ class SchwimmenGameScene(
                 okButton.isDisabled = true
                 okButton.visual = ImageVisual("images/OKButtonDisabled.png")
             }
-            println("${tableSelection.size} and ${handSelection.size}")
         }
         else {
             okButton.visual = Visual.EMPTY
@@ -1072,7 +1070,7 @@ class SchwimmenGameScene(
     private fun initializeBoard() {
         deck.isDisabled = false
         addComponents(
-            showHideToggle, showHideText, handScore, deckCount,handScorePoints, tableLabel,
+            showHideToggle, showHideText, handScore, deckCount,handScorePoints, currentPlayerLabel, tableLabel,
             actionChangeOne, actionChangeAll, actionKnock, actionPass, okButton, nextButton
         )
         okButton.visual = Visual.EMPTY
@@ -1105,14 +1103,74 @@ class SchwimmenGameScene(
         refreshPlayerNames()
     }
 
-    init {
-        background = CompoundVisual(
-            //ImageVisual("images/Background.jpg"),
-            ColorVisual(17, 26, 37, 255)
-        )
-        opacity = 1.0
+    /**
+     * Resets all variables in order to prepare for the next initialization.
+     */
+    private fun reset() {
+        initialized = false
+        handView.clear()
+        tableView.clear()
+        namesView.clear()
+        checkView.clear()
+        handSelection.clear()
+        tableSelection.clear()
+        hidden = true
+        currentPlayer = 0
+    }
+
+    /**
+     * Ends the game. There are only two scenarios where this gets called according to game rules.
+     */
+    private fun finishGame() {
+        refreshActionButtons(nextButton, true)
+        removeComponents(nextButton, exitButton, actionChangeOne, actionChangeAll, actionKnock, actionPass)
         addComponents(
-            deck, exitButton, schwimmenLabel, currentPlayerLabel, startButton
-        )
+            Label(
+                posX = 0, posY = 0, width = 1920, height = 1080,
+                visual = ColorVisual(150,150,150,40)
+            ), Label(
+                posX = 0, posY = 240, width = 1920, height = 600,
+                visual = ColorVisual(255,255,255,150)
+            ),Label(
+                posX = 600, posY = 470, width = 700, height = 125,
+                visual = ImageVisual("images/GameOver.png")
+            ), Button(
+                posX = 760, posY = 871, width = 394, height = 98,
+                visual = ImageVisual("images/Continue.png")
+            ).apply {
+                onMouseEntered = {
+                    if(!this.isDisabled) {
+                        visual = ImageVisual("images/ContinueHover.png")
+                    }
+                }
+                onMouseExited = {
+                    if(!this.isDisabled) {
+                        visual = ImageVisual("images/Continue.png")
+                    }
+                }
+                onMouseClicked = {
+                    /* Do not exterminate currentGame just yet, because it's still needed for the leaderboard */
+                    if(!this.isDisabled) {
+                        /* Service layer */
+                        rootService.gameService.finishGame()
+                        refreshActionButtons(this, false)
+                        reset()
+                        rootService.playerActionService.onAllRefreshables {
+                            refreshAfterGameEnd()
+                        }
+                        removeComponents(this)
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method replaces the regular init method, so that it can be called from outside.
+     */
+    fun startGame() {
+        background = ColorVisual(17, 26, 37, 255)
+        opacity = 1.0
+        addComponents(deck, exitButton, schwimmenLabel, startButton)
+        startButton.isDisabled = false
     }
 }

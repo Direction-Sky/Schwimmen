@@ -16,17 +16,9 @@ class SchwimmenGame constructor(
     val deck: Deck) {
 
     /**
-     * Getter method to retrieve the private attribute passCounter
-     * @return the number of players who have passed in a row as an Int
-     */
-    fun passCounter(): Int {
-        return passCounter
-    }
-
-    /**
      * This is used to model the game scenario where all players have passed
      */
-    fun incrementPassCounter(): Unit {
+    fun incrementPassCounter() {
         passCounter += 1
     }
 }

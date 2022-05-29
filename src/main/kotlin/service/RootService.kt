@@ -30,4 +30,9 @@ class RootService() {
     fun addRefreshables(vararg newRefreshables: Refreshable) {
         newRefreshables.forEach { addRefreshable(it) }
     }
+
+    fun removeRefreshable(oldRefreshable: Refreshable) {
+        gameService.removeRefreshable(oldRefreshable)
+        playerActionService.removeRefreshable(oldRefreshable)
+    }
 }

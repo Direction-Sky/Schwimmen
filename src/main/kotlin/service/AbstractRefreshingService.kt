@@ -18,6 +18,13 @@ abstract class AbstractRefreshingService {
     }
 
     /**
+     * Removes a [Refreshable] element from the list.
+     */
+    public fun removeRefreshable(oldRefeshable: Refreshable) {
+        refreshables.remove(oldRefeshable)
+    }
+
+    /**
      * Applies a forwarded method on all elements from [refreshables]
      */
     fun onAllRefreshables(method: Refreshable.() -> Unit) =

@@ -18,8 +18,8 @@ class SchwimmenGameTest {
     @Test
     fun incrementPassCounterTest() {
         game.incrementPassCounter()
-        assertEquals(1, game.passCounter())
+        assertEquals(1, game.passCounter)
         game.incrementPassCounter()
-        assertEquals(2, game.passCounter())
+        assertEquals(2, game.passCounter)
     }
 }

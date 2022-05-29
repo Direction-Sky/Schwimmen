@@ -22,7 +22,7 @@ class StartGameTest {
         )
         val rs = RootService()
         val gs = GameService(rs)
-        gs.startGame(pList)
+        rs.currentGame = gs.startGame(pList)
         assertTrue(gs.rootService.currentGame!!.gameLoop)
         assertEquals(4, gs.rootService.currentGame!!.players.size)
         assertEquals("P1", gs.rootService.currentGame!!.players[0].name)

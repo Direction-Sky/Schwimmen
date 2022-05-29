@@ -3,15 +3,16 @@ package view
 import service.CardImageLoader
 import tools.aqua.bgw.visual.CompoundVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.SingleLayerVisual
 
 /**
- * This class is responsible for managing effects on a card image based on mouse events. It
- * simply manipulates the visual. How it functions: all methods here take a given visual of
- * a UI component in the context of [CompoundVisual], splits it in layers, adds or removes the
- * corresponding layer and then returns the new [CompoundVisual].
- * Please note: any card will have the front image on layer 0, and back image on layer 1.
+ * This class provides a way for managing effects on a card image based on mouse events. It
+ * manipulates the passed [CompoundVisual]. How it functions: all methods here take a given visual of
+ * a UI component in the context of [CompoundVisual], splits it in layers of [SingleLayerVisual], adds
+ * or removes the corresponding layer and then returns the new [CompoundVisual] including all layers.
+ * Please note: all cards will have the front image on layer 0, and back image on layer 1.
  */
-class CardViewEffect() {
+class CardViewEffect {
     /**
      * Just for loading resources
      */
