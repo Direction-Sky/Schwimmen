@@ -12,30 +12,6 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
     var afterKnock: Int = 0
 
     /**
-     * The turn function is the backbone of our program. It keeps looping and switching
-     * players based on the game rules.
-     */
-    fun turn(
-        action: Turn,
-        player: SchwimmenPlayer,
-        handCard: SchwimmenCard? = null,
-        tableCard: SchwimmenCard? = null
-    ) {
-        if(!rootService.currentGame!!.gameLoop) {
-            if(afterKnock >= 1) {
-                afterKnock++
-            }
-
-            when(action) {
-                Turn.PASS -> pass(player)
-                Turn.KNOCK -> knock(player)
-                Turn.CHANGEONE -> changeOne(player, handCard, tableCard)
-                Turn.CHANGEALL -> changeAll(player)
-            }
-        }
-    }
-
-    /**
      * If all players have passed successively, cards on the table are to be thrown away
      * and replaced with three cards from deck.
      * If deck has insufficient cards, then game has to be ended immediately

@@ -23,7 +23,7 @@ import java.awt.Color
  * @param app is the [SchwimmenApplication] that allows showing dialog popups.
  * @param rootService is the core that holds every part of this project connected.
  */
-class NewGameMenuScene(val app: BoardGameApplication, private val rootService: RootService):
+class NewGameMenuScene(private val app: BoardGameApplication, private val rootService: RootService):
     MenuScene(1920, 1080), Refreshable {
 
     /**
@@ -227,7 +227,7 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
     }
 
     /**
-     * Adds [p3Label] and [removeButton3] and activates [p3Input] and [addButton4]. Also removes iteslf.
+     * Adds [p3Label] and [removeButton3] and activates [p3Input] and [addButton4]. Also removes itself.
      */
     private val addButton3 = Button(
         width = 90, height =  90, posX = 620, posY = p3Input.posY + 2,
@@ -371,10 +371,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
             }
             onMouseClicked = {
                 val players = mutableListOf<SchwimmenPlayer>()
-                if(!p1Input.text.isBlank()) {
+                if(p1Input.text.isNotBlank()) {
                     players.add(SchwimmenPlayer(p1Input.text.trim()))
                 }
-                if(!p2Input.text.isBlank()) {
+                if(p2Input.text.isNotBlank()) {
                     players.add(SchwimmenPlayer(p2Input.text.trim()))
                 }
                 if(!p3Input.isDisabled && p3Input.text.isNotBlank()) {
@@ -442,10 +442,10 @@ class NewGameMenuScene(val app: BoardGameApplication, private val rootService: R
         if(p2Input.text.isBlank()) {
             n--
         }
-        if(!p3Input.isDisabled && !p3Input.text.isBlank()) {
+        if(!p3Input.isDisabled && p3Input.text.isNotBlank()) {
             n++
         }
-        if(!p4Input.isDisabled && !p4Input.text.isBlank()) {
+        if(!p4Input.isDisabled && p4Input.text.isNotBlank()) {
             n++
         }
         if(n >= 2) {

@@ -1,8 +1,5 @@
 package view
 
-import entity.*
-import service.*
-
 /**
  * This interface provides some events-like functions to notify [service] elements about any changes
  * that have been made to entity in order to trigger an update on the UI.

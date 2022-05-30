@@ -5,6 +5,7 @@ import entity.SchwimmenPlayer
 import entity.SchwimmenGame
 import service.CardImageLoader
 import service.RootService
+import service.PlayerActionService
 import tools.aqua.bgw.animation.*
 import tools.aqua.bgw.components.gamecomponentviews.CardView
 import tools.aqua.bgw.components.uicomponents.Button
@@ -577,70 +578,72 @@ class SchwimmenGameScene(
      * @param view is the view that needs to be updated after animation is finished.
      */
     private fun flipCards(cards: List<SchwimmenCard>, view: BidirectionalMap<Label, SchwimmenCard> = handView) {
-        /* Show cards */
-        if(hidden) {
-            showHideText.text = "Hide"
-            hidden = false
-            refreshHandScore()
-            /* Play beautiful flip animation and refresh after it finishes */
-            cards.forEach {
-                this@SchwimmenGameScene.playAnimation(
-                    FlipAnimation(
-                        componentView = view.backward(it),
-                        fromVisual = ImageVisual(
-                            cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
-                        ),
-                        toVisual = ImageVisual(
-                            cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
-                        ),
-                        duration = 300
-                    ).apply {
-                        /* No need to refresh after each animation. Only one is enough */
-                        if(it == cards[2]) {
-                            onFinished = {
-                                refreshView(
-                                    oldSet = cards,
-                                    newSet = cards,
-                                    view = view
-                                )
-                                refreshOKButton()
+        if (initialized) {
+            /* Show cards */
+            if (hidden) {
+                showHideText.text = "Hide"
+                hidden = false
+                refreshHandScore()
+                /* Play beautiful flip animation and refresh after it finishes */
+                cards.forEach {
+                    this@SchwimmenGameScene.playAnimation(
+                        FlipAnimation(
+                            componentView = view.backward(it),
+                            fromVisual = ImageVisual(
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                            ),
+                            toVisual = ImageVisual(
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                            ),
+                            duration = 300
+                        ).apply {
+                            /* No need to refresh after each animation. Only one is enough */
+                            if (it == cards[2]) {
+                                onFinished = {
+                                    refreshView(
+                                        oldSet = cards,
+                                        newSet = cards,
+                                        view = view
+                                    )
+                                    refreshOKButton()
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
-        }
-        /* Hide cards */
-        else {
-            showHideText.text = "Show"
-            hidden = true
-            refreshHandScore()
-            /* Play flip animation and refresh after it finishes */
-            cards.forEach {
-                this@SchwimmenGameScene.playAnimation(
-                    FlipAnimation(
-                        componentView = view.backward(it),
-                        fromVisual = ImageVisual(
-                            cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
-                        ),
-                        toVisual = ImageVisual(
-                            cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
-                        ),
-                        duration = 300
-                    ).apply {
-                        /* No need to refresh after each animation. Only one is enough */
-                        if(it == cards[2]) {
-                            onFinished = {
-                                refreshView(
-                                    cards,
-                                    cards,
-                                    view
-                                )
-                                refreshOKButton()
+            /* Hide cards */
+            else {
+                showHideText.text = "Show"
+                hidden = true
+                refreshHandScore()
+                /* Play flip animation and refresh after it finishes */
+                cards.forEach {
+                    this@SchwimmenGameScene.playAnimation(
+                        FlipAnimation(
+                            componentView = view.backward(it),
+                            fromVisual = ImageVisual(
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                            ),
+                            toVisual = ImageVisual(
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
+                            ),
+                            duration = 300
+                        ).apply {
+                            /* No need to refresh after each animation. Only one is enough */
+                            if (it == cards[2]) {
+                                onFinished = {
+                                    refreshView(
+                                        cards,
+                                        cards,
+                                        view
+                                    )
+                                    refreshOKButton()
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
@@ -879,7 +882,7 @@ class SchwimmenGameScene(
 
     /**
      * Refreshes the check image on the left of player names. This fun is to be called after turn
-     * is finished, and before clicking [nextButton]. It increments [afterKnock] and can end the
+     * is finished, and before clicking [nextButton]. It increments [PlayerActionService.afterKnock] and can end the
      * game if a full round had been made after someone had knocked.
      */
     private fun refreshCheckView() {
@@ -1037,7 +1040,7 @@ class SchwimmenGameScene(
                 tableSelection.clear()
                 refreshOKButton()
                 rootService.currentGame!!.tableCards.clear()
-                /* Using tableView.getCoDomain() proved to be working, where as addAll(newCards) didn't,
+                /* Using tableView.getCoDomain() proved to be working, whereas addAll(newCards) didn't,
                 * noting that newCards at this point will be empty as well. */
                 rootService.currentGame!!.tableCards.addAll(tableView.getCoDomain())
             }
@@ -1073,6 +1076,7 @@ class SchwimmenGameScene(
             showHideToggle, showHideText, handScore, deckCount,handScorePoints, currentPlayerLabel, tableLabel,
             actionChangeOne, actionChangeAll, actionKnock, actionPass, okButton, nextButton
         )
+        showHideToggle.isSelected = false
         okButton.visual = Visual.EMPTY
         refreshHandScore()
         /* Create view for table cards with beautiful animations */
@@ -1101,6 +1105,7 @@ class SchwimmenGameScene(
             playerLabelsY += 70
         }
         refreshPlayerNames()
+        initialized = true
     }
 
     /**
