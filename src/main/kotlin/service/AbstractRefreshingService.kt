@@ -13,15 +13,8 @@ abstract class AbstractRefreshingService {
     /**
      * Adds a [Refreshable] element to the list.
      */
-    public fun addRefreshable(newRefeshable: Refreshable) {
-        refreshables.add(newRefeshable)
-    }
-
-    /**
-     * Removes a [Refreshable] element from the list.
-     */
-    public fun removeRefreshable(oldRefeshable: Refreshable) {
-        refreshables.remove(oldRefeshable)
+    fun addRefreshable(newRefreshable: Refreshable) {
+        refreshables.add(newRefreshable)
     }
 
     /**

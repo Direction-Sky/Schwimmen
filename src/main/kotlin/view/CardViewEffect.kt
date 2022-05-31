@@ -73,21 +73,6 @@ class CardViewEffect {
     }
 
     /**
-     * Shows front face of a card.
-     * @param visual is the forwarded [CompoundVisual] at its current state.
-     * @return the modified [visual] as a [CompoundVisual].
-     */
-    fun show(visual: CompoundVisual): CompoundVisual {
-        val result = CompoundVisual()
-        val layers = visual.children.toMutableList()
-        layers[1]?.let {
-            layers.removeAt(1)
-        }
-        result.children = layers.toList()
-        return result
-    }
-
-    /**
      * Shows back face of a card.
      * @param visual is the forwarded [CompoundVisual] at its current state.
      * @return the modified [visual] as a [CompoundVisual].

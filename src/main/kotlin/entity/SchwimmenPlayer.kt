@@ -1,6 +1,5 @@
 package entity
 
-
 /**
  * A simple class to store a player's name as well as cards in hand.
  * @param name is the player's name.
@@ -29,30 +28,31 @@ class SchwimmenPlayer constructor(val name: String) {
      * @return 30.5 if all cards have the same value, or the highest sum of cards of the same suit
      */
     fun checkHandScore(): Double {
-        var result: Double = 0.0
-        // Case 1
-        if(handCards.all{it.value.equals(handCards.get(0).value)}) {
+        var result = 0.0
+        /* Case 1 */
+        if(handCards.all{ it.value == handCards[0].value }) {
             return 30.5
         }
-        // Case 2
+        /* Case 2 */
         else if(handCards.all {
                 result += it.points()
-                it.suit.equals(handCards.get(0).suit)}){
+                it.suit == handCards[0].suit
+            }){
             return result
         }
-        // Case 3
-        else if(handCards[0].suit.equals(handCards[1].suit)) {
+        /* Case 3 */
+        else if(handCards[0].suit == handCards[1].suit) {
             return result - handCards[2].points()
         }
-        // Case 4
-        else if(handCards[0].suit.equals(handCards[2].suit)) {
+        /* Case 4 */
+        else if(handCards[0].suit == handCards[2].suit) {
             return result - handCards[1].points() + handCards[2].points()
         }
-        // Case 5
-        else if(handCards[1].suit.equals(handCards[2].suit)) {
+        /* Case 5 */
+        else if(handCards[1].suit == handCards[2].suit) {
             return handCards[1].points() + handCards[2].points()
         }
-        // Case 6
+        /* Case 6 */
         else {
             return maxOf(handCards[0].points(), handCards[1].points(), handCards[2].points())
         }

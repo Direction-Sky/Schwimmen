@@ -8,7 +8,7 @@ import view.Refreshable
  * @property playerActionService refers to the instance of [PlayerActionService].
  * @property gameService refers to the instance of [GameService].
  */
-class RootService() {
+class RootService {
     var currentGame: SchwimmenGame? = null
 
     val gameService = GameService(this)
@@ -18,7 +18,7 @@ class RootService() {
      * Adds the provided [newRefreshable] to all services connected
      * to this root service
      */
-    fun addRefreshable(newRefreshable: Refreshable) {
+    private fun addRefreshable(newRefreshable: Refreshable) {
         gameService.addRefreshable(newRefreshable)
         playerActionService.addRefreshable(newRefreshable)
     }
@@ -31,8 +31,4 @@ class RootService() {
         newRefreshables.forEach { addRefreshable(it) }
     }
 
-    fun removeRefreshable(oldRefreshable: Refreshable) {
-        gameService.removeRefreshable(oldRefreshable)
-        playerActionService.removeRefreshable(oldRefreshable)
-    }
 }

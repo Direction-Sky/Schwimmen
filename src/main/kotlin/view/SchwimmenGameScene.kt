@@ -502,7 +502,7 @@ class SchwimmenGameScene(
             onMouseClicked = {
                 refreshActionButtons(this, true)
                 /* Service layer: Knock */
-                rootService.playerActionService.knock(rootService.currentGame!!.players[currentPlayer])
+                rootService.playerActionService.knock()
                 refreshCheckView()
             }
         }
@@ -524,12 +524,10 @@ class SchwimmenGameScene(
         }
         onMouseClicked = {
             if (!this.isDisabled) {
-                val list: MutableList<SchwimmenCard>? = rootService.playerActionService.pass(
-                    rootService.currentGame!!.players[currentPlayer]
-                )
+                val list: MutableList<SchwimmenCard>? = rootService.playerActionService.pass()
                 /* If list was created, it means a full round has been passed */
                 if(list != null) {
-                    /* If the list is empty, this means deck had insufficient cards */
+                    /* If created list is empty, it means deck had insufficient cards */
                     if(list.size == 0) {
                         finishGame()
                     }
@@ -572,6 +570,22 @@ class SchwimmenGameScene(
     }
 
     /**
+     * Reads "Table cards" at the top center of the screen.
+     */
+    private val tableLabel = Label(
+        posX = 800, posY = 50, width = 300, height = 50,
+        text = "Table cards", font = globalFont
+    ).apply{ this.isDisabled = true }
+
+    /**
+     * Text visualized at the bottom of hand cards to indicate current player.
+     */
+    private val currentPlayerLabel = Label(
+        posX = 800, posY = 750, width = 300, height = 100,
+        text = "Click Start", font = globalFont, alignment = Alignment.CENTER
+    )
+
+    /**
      * Plays beautiful flip animations on passed cards.
      * @param cards is the list of [SchwimmenCard], with which the paired [Label]s will
      * be animated.
@@ -585,20 +599,20 @@ class SchwimmenGameScene(
                 hidden = false
                 refreshHandScore()
                 /* Play beautiful flip animation and refresh after it finishes */
-                cards.forEach {
+                cards.forEach { card ->
                     this@SchwimmenGameScene.playAnimation(
                         FlipAnimation(
-                            componentView = view.backward(it),
+                            componentView = view.backward(card),
                             fromVisual = ImageVisual(
                                 cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
                             ),
                             toVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(card), 190, 250)
                             ),
                             duration = 300
                         ).apply {
                             /* No need to refresh after each animation. Only one is enough */
-                            if (it == cards[2]) {
+                            if (card == cards[2]) {
                                 onFinished = {
                                     refreshView(
                                         oldSet = cards,
@@ -618,12 +632,12 @@ class SchwimmenGameScene(
                 hidden = true
                 refreshHandScore()
                 /* Play flip animation and refresh after it finishes */
-                cards.forEach {
+                cards.forEach { card ->
                     this@SchwimmenGameScene.playAnimation(
                         FlipAnimation(
-                            componentView = view.backward(it),
+                            componentView = view.backward(card),
                             fromVisual = ImageVisual(
-                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(it), 190, 250)
+                                cardImageLoader.resizedBufferedImage(cardImageLoader.frontImageForCard(card), 190, 250)
                             ),
                             toVisual = ImageVisual(
                                 cardImageLoader.resizedBufferedImage(cardImageLoader.backImage, 190, 250)
@@ -631,7 +645,7 @@ class SchwimmenGameScene(
                             duration = 300
                         ).apply {
                             /* No need to refresh after each animation. Only one is enough */
-                            if (it == cards[2]) {
+                            if (card == cards[2]) {
                                 onFinished = {
                                     refreshView(
                                         cards,
@@ -647,22 +661,6 @@ class SchwimmenGameScene(
             }
         }
     }
-
-    /**
-     * Reads "Table cards" at the top center of the screen.
-     */
-    private val tableLabel = Label(
-        posX = 800, posY = 50, width = 300, height = 50,
-        text = "Table cards", font = globalFont
-    ).apply{ this.isDisabled = true }
-
-    /**
-     * Text visualized at the bottom of hand cards to indicate current player.
-     */
-    private val currentPlayerLabel = Label(
-        posX = 800, posY = 750, width = 300, height = 100,
-        text = "Click Start", font = globalFont, alignment = Alignment.CENTER
-    )
 
     /**
      * @return the index of the next player in the circle, cycling between 0 and player count.
@@ -765,32 +763,32 @@ class SchwimmenGameScene(
         /* Approach is to remove old cards and add new ones */
         val y = if(view == handView) 490 else 150
 
-        oldSet?.forEach {
-            removeComponents(view.backward(it))
+        oldSet?.forEach { card->
+            removeComponents(view.backward(card))
             /* Clear selection to make it easier to implement change one card */
             when(view) {
-                handView -> handSelection.remove(it)
-                tableView -> tableSelection.remove(it)
+                handView -> handSelection.remove(card)
+                tableView -> tableSelection.remove(card)
             }
             /* Only remove tuple at the end, otherwise [Label] won't be found */
-            view.remove(view.backward(it), it)
+            view.remove(view.backward(card), card)
         }
-        /* Play little animation to indicate change in the table view */
+        /* Play short animation to indicate change in the table view */
         when(view) { tableView -> this@SchwimmenGameScene.playAnimation(SequentialAnimation(
             MovementAnimation(tableLabel, 0, -3,200),
             MovementAnimation(tableLabel, 0, 6,100)
         )) }
-        /* Create the new image labels  representing the cards */
+        /* Create the new image labels representing the cards */
         var x = 630
-        newSet.forEach {
+        newSet.forEach { card ->
             addComponents(
                 Label(
                     x, y, 190, 250,
                 ).apply {
-                    view.add(this, it)
+                    view.add(this, card)
                     var selected = false
                     var effect = CompoundVisual(
-                        ImageVisual(cardImageLoader.frontImageForCard(it))
+                        ImageVisual(cardImageLoader.frontImageForCard(card))
                     )
                     /* Table cards are never hidden therefore always enabled */
                     if(view == handView) {
@@ -821,8 +819,8 @@ class SchwimmenGameScene(
                                     visual = effect
                                     selected = true
                                     when (view) {
-                                        handView -> handSelection.add(handView.forward(this))
-                                        tableView -> tableSelection.add(tableView.forward(this))
+                                        handView -> handSelection.add(card)
+                                        tableView -> tableSelection.add(card)
                                     }
                                 }
                                 true -> {
@@ -830,8 +828,8 @@ class SchwimmenGameScene(
                                     visual = effect
                                     selected = false
                                     when (view) {
-                                        handView -> handSelection.remove(handView.forward(this))
-                                        tableView -> tableSelection.remove(tableView.forward(this))
+                                        handView -> handSelection.remove(card)
+                                        tableView -> tableSelection.remove(card)
                                     }
                                 }
                             }
@@ -960,9 +958,8 @@ class SchwimmenGameScene(
     }
 
     /**
-     * Plays beautiful animations of drawing 3 cards to the table.
-     * Updates the list of table cards and refreshes [tableView],
-     * and makes sure that [SchwimmenGame.tableCards] has exactly
+     * Plays beautiful animations of drawing 3 cards to the table. Updates the list of table cards
+     *  and refreshes [tableView], and makes sure that [SchwimmenGame.tableCards] has exactly
      * three cards by the end.
      */
     private fun drawThreeCards(oldCards: List<SchwimmenCard>?, newCards: List<SchwimmenCard>) {

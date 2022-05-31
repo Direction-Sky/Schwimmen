@@ -105,9 +105,6 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
             onMouseExited = {
                 this.visual = ImageVisual("images/TUButtonSmall.png")
             }
-            onMousePressed = {
-                //this.visual = ImageVisual("images/TUButtonPressed2.png")
-            }
             onMouseClicked = {
                 app.showDialog(Dialog(
                     dialogType = DialogType.INFORMATION,

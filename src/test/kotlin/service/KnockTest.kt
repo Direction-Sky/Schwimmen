@@ -24,10 +24,10 @@ class KnockTest {
         val gs = GameService(rs)
         rs.currentGame = gs.startGame(pList)
         val pas = PlayerActionService(gs.rootService)
-        pas.pass(pList[0])
+        pas.pass()
         assertEquals(1, gs.rootService.currentGame!!.passCounter)
         assertEquals(0, pas.afterKnock)
-        pas.knock(pList[1])
+        pas.knock()
         assertEquals(0, gs.rootService.currentGame!!.passCounter)
         assertEquals(1, pas.afterKnock)
     }

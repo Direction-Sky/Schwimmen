@@ -15,12 +15,11 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      * If all players have passed successively, cards on the table are to be thrown away
      * and replaced with three cards from deck.
      * If deck has insufficient cards, then game has to be ended immediately
-     * @param player is the person that is currently playing.
-     * @param returns three cards as a mutable list in case a full round had been passed.
+     * @return three cards as a mutable list in case a full round had been passed.
      * Otherwise, null. If the size of the returned [MutableList] is 0, that means the
      * deck has insufficient cards.
      */
-    fun pass(player: SchwimmenPlayer): MutableList<SchwimmenCard>? {
+    fun pass(): MutableList<SchwimmenCard>? {
         if(afterKnock >= 1) {
             afterKnock++
         }
@@ -47,9 +46,8 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
 
     /**
      * Once a player has knocked, a countdown is started, so that each player gets exactly one turn after.
-     * @param player is the person that is currently playing.
      */
-    fun knock(player: SchwimmenPlayer) {
+    fun knock() {
         if(afterKnock == 0) {
             afterKnock++
         }

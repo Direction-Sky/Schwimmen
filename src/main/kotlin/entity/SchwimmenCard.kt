@@ -8,7 +8,7 @@ data class SchwimmenCard constructor(val suit:CardSuit, val value: CardValue) {
     override fun toString() = "$suit$value"
 
     /**
-     * A simple function used to calculate a player's hand score
+     * A simple function that assigns each card a value according [CardValue] and game rules.
      */
     fun points(): Double {
         return when(value) {
