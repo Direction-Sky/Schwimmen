@@ -35,7 +35,6 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
         fontWeight = Font.FontWeight.SEMI_BOLD,
     )
 
-
     /**
      * CSS for JavaFX. Used for styling the text fields.
      */
@@ -120,7 +119,7 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
      * Input field for player 1's name. Permanently enabled.
      */
     private val p1Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 367 - 45,
+        width = 428, height = 90, posX = 795, posY = 322,
         text = namesList.random(),
         font = globalFont,
         prompt = "Enter name",
@@ -135,7 +134,7 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
      * Input field for player 2's name. Permanently enabled.
      */
     private val p2Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 476 - 45,
+        width = 428, height = 90, posX = 795, posY = 431,
         text = namesList.random(),
         font = globalFont,
         prompt = "Enter name",
@@ -151,7 +150,7 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
      * and disabled upon clicking [removeButton3].
      */
     private val p3Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 587 - 45,
+        width = 428, height = 90, posX = 795, posY = 542,
         text = "Add player 3",
         font = globalFont,
         prompt = "Enter name"
@@ -169,7 +168,7 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
      * and disabled upon clicking [removeButton4].
      */
     private val p4Input = TextField(
-        width = 428, height = 90, posX = 795, posY = 697 - 45,
+        width = 428, height = 90, posX = 795, posY = 652,
         text = "Add player 4",
         font = globalFont,
         prompt = "Enter name",
@@ -368,17 +367,10 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
             }
             onMouseClicked = {
                 val players = mutableListOf<SchwimmenPlayer>()
-                if(p1Input.text.isNotBlank()) {
-                    players.add(SchwimmenPlayer(p1Input.text.trim()))
-                }
-                if(p2Input.text.isNotBlank()) {
-                    players.add(SchwimmenPlayer(p2Input.text.trim()))
-                }
-                if(!p3Input.isDisabled && p3Input.text.isNotBlank()) {
-                    players.add(SchwimmenPlayer(p3Input.text.trim()))
-                }
-                if(!p4Input.isDisabled && p4Input.text.isNotBlank()) {
-                    players.add(SchwimmenPlayer(p4Input.text.trim()))
+                for (field in listOf(p1Input, p2Input, p3Input, p4Input)) {
+                    if(!field.isDisabled && field.text.isNotBlank()) {
+                        players.add(SchwimmenPlayer(field.text.trim()))
+                    }
                 }
                 rootService.currentGame = rootService.gameService.startGame(players)
             }
@@ -432,27 +424,16 @@ class NewGameMenuScene(private val app: BoardGameApplication, private val rootSe
      * @return the number of entered player names (spaces don't count).
      */
     private fun countPlayers(): Int {
-        var n = 2
-        if(p1Input.text.isBlank()) {
-            n--
+        var n = 0
+        for(field in listOf(p1Input, p2Input, p3Input, p4Input)) {
+            if(!field.isDisabled && field.text.isNotBlank()) {
+                n++
+            }
         }
-        if(p2Input.text.isBlank()) {
-            n--
-        }
-        if(!p3Input.isDisabled && p3Input.text.isNotBlank()) {
-            n++
-        }
-        if(!p4Input.isDisabled && p4Input.text.isNotBlank()) {
-            n++
-        }
-        if(n >= 2) {
-            startButton.isDisabled = false
-            startButton.visual = ImageVisual("images/StartButton.png")
-        }
-        if(n < 2) {
-            startButton.isDisabled = true
-            startButton.visual = ImageVisual("images/StartButtonDisabled.png")
-        }
+        startButton.isDisabled = n < 2
+        startButton.visual =
+            if(n < 2) ImageVisual("images/StartButtonDisabled.png")
+            else ImageVisual("images/StartButton.png")
         return n
     }
 }

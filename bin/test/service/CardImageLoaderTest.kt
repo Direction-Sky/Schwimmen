@@ -30,7 +30,8 @@ class CardImageLoaderTest {
     @BeforeTest
     fun loadCompareImage() {
         queenOfHearts =
-            ImageIO.read(CardImageLoaderTest::class.java.getResource("/queen_of_hearts.png"))
+            imageLoader.frontImageFor(CardSuit.HEARTS, CardValue.QUEEN)
+            //ImageIO.read(CardImageLoaderTest::class.java.getResource("/queen_of_hearts.png"))
     }
 
     /**
@@ -50,8 +51,8 @@ class CardImageLoaderTest {
         allImages += imageLoader.blankImage
 
         allImages.forEach {
-            assertEquals(130, it.width)
-            assertEquals(200, it.height)
+            assertEquals(300, it.width)
+            assertEquals(375, it.height)
         }
     }
 

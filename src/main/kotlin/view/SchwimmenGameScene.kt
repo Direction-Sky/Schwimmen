@@ -122,7 +122,6 @@ class SchwimmenGameScene(
      */
     private val nextButton = Button(
         width = 222, height = 107, posX = 1624, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ActionNextDisabled.png")
     ).apply {
         this.isDisabled = true
@@ -158,6 +157,7 @@ class SchwimmenGameScene(
         front = ImageVisual(cardImageLoader.backImage),
         back = ImageVisual(cardImageLoader.backImage)
     )
+
     /**
      * This is just a visual that shows the back image of a card representing the deck.
      */
@@ -219,6 +219,9 @@ class SchwimmenGameScene(
         }
     }
 
+    /**
+     * Reads the count of remaining cards in the deck
+     */
     private val deckCount = Label(
         posX = deck.posX, posY = deck.posY + 235,
         width = 190, height = 100, font = globalFont
@@ -245,7 +248,6 @@ class SchwimmenGameScene(
      */
     val exitButton = Button(
         width = 222, height = 107, posX = 75, posY = 871,
-        alignment = Alignment.CENTER,
         visual = ImageVisual("images/ExitButton.png"),
     ).apply {
         onMouseEntered = {
@@ -582,7 +584,7 @@ class SchwimmenGameScene(
      */
     private val currentPlayerLabel = Label(
         posX = 800, posY = 750, width = 300, height = 100,
-        text = "Click Start", font = globalFont, alignment = Alignment.CENTER
+        text = "Click Start", font = globalFont
     )
 
     /**
@@ -771,7 +773,7 @@ class SchwimmenGameScene(
                 tableView -> tableSelection.remove(card)
             }
             /* Only remove tuple at the end, otherwise [Label] won't be found */
-            view.remove(view.backward(card), card)
+            view.removeBackward(card)
         }
         /* Play short animation to indicate change in the table view */
         when(view) { tableView -> this@SchwimmenGameScene.playAnimation(SequentialAnimation(
@@ -1048,7 +1050,7 @@ class SchwimmenGameScene(
      * Updates the visual of [okButton] during change one card according to [okButtonActive].
      */
     private fun refreshOKButton() {
-        /* If the visual is set to EMPTY, this meas player has not selected change one card */
+        /* If the visual is set to EMPTY, this means player has not selected change one card */
         if(okButtonActive) {
             if (handSelection.size == 1 && tableSelection.size == 1) {
                 okButton.isDisabled = false
@@ -1074,6 +1076,7 @@ class SchwimmenGameScene(
             actionChangeOne, actionChangeAll, actionKnock, actionPass, okButton, nextButton
         )
         showHideToggle.isSelected = false
+        showHideText.text = "Show"
         okButton.visual = Visual.EMPTY
         refreshHandScore()
         /* Create view for table cards with beautiful animations */
